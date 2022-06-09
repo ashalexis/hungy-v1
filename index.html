@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Let's decide!</title>
+		<meta lang="en" />
+	</head>
+
+	<style>
+		#choice {
+			margin-bottom: 1rem;
+			border: 1px solid red;
+		}
+	</style>
+
+	<body>
+		<p id="choice">Thinking...</p>
+		<h1>What would you like to eat?</h1>
+		<form id="form" action="">
+			<input type="radio" id="chinese" name="food" value="Chinese" />
+			<label for="chinese">Chinese</label><br />
+			<input type="radio" id="japanese" name="food" value="Japanese" />
+			<label for="japanese">Japanese</label><br />
+			<input type="radio" id="italian" name="food" value="Italian" />
+			<label for="italian">Italian</label>
+			<br />
+			<button>Submit!</button>
+		</form>
+
+		<script src="/socket.io/socket.io.js"></script>
+		<script>
+			const socket = io();
+
+			const choice = document.getElementById("choice");
+			const form = document.getElementById("form");
+			const foodChoices = document.getElementsByName("food");
+			let finalChoice;
+
+			foodChoices.forEach((choice) =>
+				choice.addEventListener("change", function (e) {
+					if (choice.checked) finalChoice = choice.value;
+				})
+			);
+
+			form.addEventListener("submit", function (e) {
+				e.preventDefault();
+				if (finalChoice) {
+					socket.emit("food choice", finalChoice);
+					foodChoices.forEach((choice) => (choice.checked = false));
+				}
+			});
+
+			socket.on("food choice", function (food) {
+				choice.textContent = food;
+				window.scrollTo(0, document.body.scrollHeight);
+			});
+		</script>
+	</body>
+</html>

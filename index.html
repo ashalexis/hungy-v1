@@ -5,24 +5,27 @@
 		<meta lang="en" />
 	</head>
 
-	<style>
-		#choice {
-			margin-bottom: 1rem;
-			border: 1px solid red;
-		}
-	</style>
-
 	<body>
-		<p id="choice">Thinking...</p>
 		<h1>What would you like to eat?</h1>
 		<form id="form" action="">
-			<input type="radio" id="chinese" name="food" value="Chinese" />
+			<input type="checkbox" id="chinese" name="food" value="Chinese" />
 			<label for="chinese">Chinese</label><br />
-			<input type="radio" id="japanese" name="food" value="Japanese" />
+			<input type="checkbox" id="japanese" name="food" value="Japanese" />
 			<label for="japanese">Japanese</label><br />
-			<input type="radio" id="italian" name="food" value="Italian" />
-			<label for="italian">Italian</label>
-			<br />
+			<input type="checkbox" id="korean" name="food" value="Korean" />
+			<label for="korean">Korean</label><br />
+			<input type="checkbox" id="malaysian" name="food" value="Malaysian" />
+			<label for="malaysian">Malaysian</label><br />
+			<input type="checkbox" id="italian" name="food" value="Italian" />
+			<label for="italian">Italian</label><br />
+			<input type="checkbox" id="french" name="food" value="French" />
+			<label for="french">French</label><br />
+			<input type="checkbox" id="spanish" name="food" value="Spanish" />
+			<label for="spanish">Spanish</label><br />
+			<input type="checkbox" id="mexican" name="food" value="Mexican" />
+			<label for="mexican">Mexican</label><br />
+			<input type="checkbox" id="australian" name="food" value="Australian" />
+			<label for="australian">Australian</label><br />
 			<button>Submit!</button>
 		</form>
 
@@ -30,27 +33,37 @@
 		<script>
 			const socket = io();
 
-			const choice = document.getElementById("choice");
 			const form = document.getElementById("form");
 			const foodChoices = document.getElementsByName("food");
-			let finalChoice;
-
-			foodChoices.forEach((choice) =>
-				choice.addEventListener("change", function (e) {
-					if (choice.checked) finalChoice = choice.value;
-				})
-			);
+			const foodLabels = document.getElementsByTagName("label");
+			const finalChoices = [];
 
 			form.addEventListener("submit", function (e) {
 				e.preventDefault();
-				if (finalChoice) {
-					socket.emit("food choice", finalChoice);
+				foodChoices.forEach(
+					(choice) => choice.checked && finalChoices.push(choice.value)
+				);
+				if (finalChoices) {
+					console.log(finalChoices);
+					socket.emit("food choice", finalChoices);
 					foodChoices.forEach((choice) => (choice.checked = false));
+					// clear final choices
+					while (finalChoices.length) {
+						finalChoices.pop();
+					}
 				}
 			});
 
-			socket.on("food choice", function (food) {
-				choice.textContent = food;
+			socket.on("food choice", function (updatedChoices) {
+				for (let i = 0; i < foodChoices.length; i++) {
+					if (updatedChoices.includes(foodChoices[i].value)) {
+						foodChoices[i].style.display = "inline";
+						foodLabels[i].style.display = "inline";
+					} else {
+						foodChoices[i].style.display = "none";
+						foodLabels[i].style.display = "none";
+					}
+				}
 				window.scrollTo(0, document.body.scrollHeight);
 			});
 		</script>

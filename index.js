@@ -14,8 +14,8 @@ app.get("/", (req, res) => {
 
 // listening on the connection event
 io.on("connection", (socket) => {
-	socket.on("food choice", (msg) => {
-		io.emit("food choice", msg);
+	socket.on("food choice", (choice) => {
+		io.emit("food choice", choice);
 	});
 });
 

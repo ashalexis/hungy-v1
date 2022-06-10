@@ -12,6 +12,10 @@ app.get("/", (req, res) => {
 	res.sendFile(__dirname + "/index.html");
 });
 
+app.get('/elimination', (req, res) => {
+	res.sendFile(__dirname + '/elimination.html')
+})
+
 // listening on the connection event
 io.on("connection", (socket) => {
 	socket.on("food choice", (choice) => {

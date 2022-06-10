@@ -1,71 +1,128 @@
 <!DOCTYPE html>
 <html>
-	<head>
-		<title>Let's decide!</title>
-		<meta lang="en" />
-	</head>
+  <head>
+    <title>Let's decide!</title>
+    <meta lang="en" />
+  </head>
 
-	<body>
-		<h1>What would you like to eat?</h1>
-		<form id="form" action="">
-			<input type="checkbox" id="chinese" name="food" value="Chinese" />
-			<label for="chinese">Chinese</label><br />
-			<input type="checkbox" id="japanese" name="food" value="Japanese" />
-			<label for="japanese">Japanese</label><br />
-			<input type="checkbox" id="korean" name="food" value="Korean" />
-			<label for="korean">Korean</label><br />
-			<input type="checkbox" id="malaysian" name="food" value="Malaysian" />
-			<label for="malaysian">Malaysian</label><br />
-			<input type="checkbox" id="italian" name="food" value="Italian" />
-			<label for="italian">Italian</label><br />
-			<input type="checkbox" id="french" name="food" value="French" />
-			<label for="french">French</label><br />
-			<input type="checkbox" id="spanish" name="food" value="Spanish" />
-			<label for="spanish">Spanish</label><br />
-			<input type="checkbox" id="mexican" name="food" value="Mexican" />
-			<label for="mexican">Mexican</label><br />
-			<input type="checkbox" id="australian" name="food" value="Australian" />
-			<label for="australian">Australian</label><br />
-			<button>Submit!</button>
-		</form>
+  <style>
+    .foodbutton {
+      margin: 1rem;
+      border: 1px solid slategray;
+      overflow: hidden;
+      max-width: 50%;
+    }
 
-		<script src="/socket.io/socket.io.js"></script>
-		<script>
-			const socket = io();
+    .foodbutton label span {
+      padding: 1rem;
+      text-align: center;
+      display: block;
+    }
 
-			const form = document.getElementById("form");
-			const foodChoices = document.getElementsByName("food");
-			const foodLabels = document.getElementsByTagName("label");
-			const finalChoices = [];
+    .foodbutton label input {
+      position: absolute;
+      display: none;
+    }
 
-			form.addEventListener("submit", function (e) {
-				e.preventDefault();
-				foodChoices.forEach(
-					(choice) => choice.checked && finalChoices.push(choice.value)
-				);
-				if (finalChoices) {
-					console.log(finalChoices);
-					socket.emit("food choice", finalChoices);
-					foodChoices.forEach((choice) => (choice.checked = false));
-					// clear final choices
-					while (finalChoices.length) {
-						finalChoices.pop();
-					}
-				}
-			});
+    .foodbutton input:checked + span {
+      background-color: red;
+    }
+  </style>
 
-			socket.on("food choice", function (updatedChoices) {
-				for (let i = 0; i < foodChoices.length; i++) {
-					if (updatedChoices.includes(foodChoices[i].value)) {
-						foodChoices[i].style.display = "inline";
-						foodLabels[i].style.display = "inline";
-					} else {
-						foodChoices[i].style.display = "none";
-						foodLabels[i].style.display = "none";
-					}
-				}
-				window.scrollTo(0, document.body.scrollHeight);
-			});
-		</script>
-	</body>
+  <body>
+    <h1>What would you like to eat?</h1>
+    <p>Remove one each until one more remains</p>
+    <form id="form">
+      <div class="foodbutton">
+        <label for="chinese">
+          <input type="radio" id="chinese" name="food" value="Chinese" />
+          <span>Chinese</span>
+        </label>
+      </div>
+      <div class="foodbutton">
+        <label for="japanese">
+          <input type="radio" id="japanese" name="food" value="Japanese" />
+          <span>Japanese</span>
+        </label>
+      </div>
+      <div class="foodbutton">
+        <label for="korean">
+          <input type="radio" id="korean" name="food" value="Korean" />
+          <span>Korean</span>
+        </label>
+      </div>
+      <div class="foodbutton">
+        <label for="malaysian">
+          <input type="radio" id="malaysian" name="food" value="Malaysian" />
+          <span>Malaysian</span>
+        </label>
+      </div>
+      <div class="foodbutton">
+        <label for="thai">
+          <input type="radio" id="thai" name="food" value="Thai" />
+          <span>Thai</span>
+        </label>
+      </div>
+      <div class="foodbutton">
+        <label for="italian">
+          <input type="radio" id="italian" name="food" value="Italian" />
+          <span>Italian</span>
+        </label>
+      </div>
+      <div class="foodbutton">
+        <label for="french">
+          <input type="radio" id="french" name="food" value="French" />
+          <span>French</span>
+        </label>
+      </div>
+      <div class="foodbutton">
+        <label for="spanish">
+          <input type="radio" id="spanish" name="food" value="Spanish" />
+          <span>Spanish</span>
+        </label>
+      </div>
+      <div class="foodbutton">
+        <label for="mexican">
+          <input type="radio" id="mexican" name="food" value="Mexican" />
+          <span>Mexican</span>
+        </label>
+      </div>
+      <div class="foodbutton">
+        <label for="australian">
+          <input type="radio" id="australian" name="food" value="Australian" />
+          <span>Australian</span>
+        </label>
+      </div>
+      <button>Submit!</button>
+    </form>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+      const socket = io();
+
+      const form = document.getElementById('form');
+      const foodChoices = document.getElementsByName('food');
+      const foodButtons = document.getElementsByClassName('foodbutton');
+
+      form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        const removedChoice = document.querySelector(
+          'input[name="food"]:checked'
+        ).value;
+        if (removedChoice) {
+          socket.emit('food choice', removedChoice);
+        }
+      });
+
+      socket.on('food choice', function (deleteChoice) {
+        for (let i = 0; i < foodChoices.length; i++) {
+          if (foodChoices[i].value === deleteChoice) {
+            foodChoices[i].style.display = 'none';
+            foodButtons[i].style.display = 'none';
+          }
+        }
+        window.scrollTo(0, document.body.scrollHeight);
+      });
+    </script>
+  </body>
 </html>

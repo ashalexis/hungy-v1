@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Let's decide!</title>
+    <meta lang="en" />
+  </head>
+
+  <style>
+    .foodbutton {
+      margin: 1rem;
+      border: 1px solid slategray;
+      overflow: hidden;
+      max-width: 50%;
+    }
+
+    .foodbutton label span {
+      padding: 1rem;
+      text-align: center;
+      display: block;
+    }
+
+    .foodbutton label input {
+      position: absolute;
+      display: none;
+    }
+
+    .foodbutton input:checked + span {
+      background-color: red;
+    }
+  </style>
+
+  <body>
+    <h1>What would you like to eat?</h1>
+    <p>Remove one each until one more remains</p>
+    <form id="form">
+      <div class="foodbutton">
+        <label for="chinese">
+          <input type="radio" id="chinese" name="food" value="Chinese" />
+          <span>Chinese</span>
+        </label>
+      </div>
+      <div class="foodbutton">
+        <label for="japanese">
+          <input type="radio" id="japanese" name="food" value="Japanese" />
+          <span>Japanese</span>
+        </label>
+      </div>
+      <div class="foodbutton">
+        <label for="korean">
+          <input type="radio" id="korean" name="food" value="Korean" />
+          <span>Korean</span>
+        </label>
+      </div>
+      <div class="foodbutton">
+        <label for="malaysian">
+          <input type="radio" id="malaysian" name="food" value="Malaysian" />
+          <span>Malaysian</span>
+        </label>
+      </div>
+      <div class="foodbutton">
+        <label for="thai">
+          <input type="radio" id="thai" name="food" value="Thai" />
+          <span>Thai</span>
+        </label>
+      </div>
+      <div class="foodbutton">
+        <label for="italian">
+          <input type="radio" id="italian" name="food" value="Italian" />
+          <span>Italian</span>
+        </label>
+      </div>
+      <div class="foodbutton">
+        <label for="french">
+          <input type="radio" id="french" name="food" value="French" />
+          <span>French</span>
+        </label>
+      </div>
+      <div class="foodbutton">
+        <label for="spanish">
+          <input type="radio" id="spanish" name="food" value="Spanish" />
+          <span>Spanish</span>
+        </label>
+      </div>
+      <div class="foodbutton">
+        <label for="mexican">
+          <input type="radio" id="mexican" name="food" value="Mexican" />
+          <span>Mexican</span>
+        </label>
+      </div>
+      <div class="foodbutton">
+        <label for="australian">
+          <input type="radio" id="australian" name="food" value="Australian" />
+          <span>Australian</span>
+        </label>
+      </div>
+      <button>Submit!</button>
+    </form>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+      const socket = io();
+
+      const form = document.getElementById('form');
+      const foodChoices = document.getElementsByName('food');
+      const foodButtons = document.getElementsByClassName('foodbutton');
+
+      form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        const removedChoice = document.querySelector(
+          'input[name="food"]:checked'
+        ).value;
+        if (removedChoice) {
+          socket.emit('food choice', removedChoice);
+        }
+      });
+
+      socket.on('food choice', function (deleteChoice) {
+        for (let i = 0; i < foodChoices.length; i++) {
+          if (foodChoices[i].value === deleteChoice) {
+            foodChoices[i].style.display = 'none';
+            foodButtons[i].style.display = 'none';
+          }
+        }
+        window.scrollTo(0, document.body.scrollHeight);
+      });
+    </script>
+  </body>
+</html>

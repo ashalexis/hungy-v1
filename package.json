@@ -1,15 +1,19 @@
 {
-	"name": "lets-choose",
-	"author": "Ash Lim",
-	"version": "0.0.1",
-	"description": "A site to decide what to eat",
-	"repository": {
-		"type": "git",
-		"url": "https://github.com/ashalexis/lets-decide"
-	},
-	"dependencies": {
-		"express": "^4.18.1",
-		"socket.io": "^4.5.1",
-		"uuidv4": "^6.2.13"
-	}
+    "name": "lets-choose",
+    "author": "Ash Lim",
+    "version": "0.1.0",
+    "description": "A site to choose what to eat",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/ashalexis/lets-choose"
+    },
+    "license": "MIT",
+    "scripts": {
+        "dev": "node index.js"
+    },
+    "dependencies": {
+        "express": "^4.18.1",
+        "socket.io": "^4.5.1",
+        "uuidv4": "^6.2.13"
+    }
 }

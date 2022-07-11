@@ -24,18 +24,20 @@ app.get("/elimination", (req, res) => {
     res.sendFile(path.join(__dirname, "/elimination.html"));
 });
 
+// stylesheets
+app.use(express.static(path.join(__dirname, "/public")));
+
 const rooms = {};
 
 // listening on the connection event
 io.on("connection", (client) => {
+    console.log(io.sockets.adapter.rooms);
     // making new room
     client.on("createRoom", () => {
         let roomId = nanoid(8);
         rooms[client.id] = roomId;
-        client.emit("roomCode", roomId);
-
         client.join(roomId);
-        client.emit("init");
+        client.emit("init", roomId);
     });
 
     // join room
@@ -51,9 +53,8 @@ io.on("connection", (client) => {
             client.emit("throwError", { status: 400, message: "Room full!", roomId });
         } else {
             rooms[client.id] = roomId;
-            client.emit("roomCode", roomId);
             client.join(roomId);
-            client.emit("init");
+            client.emit("init", roomId);
         }
     });
 

@@ -1,0 +1,45 @@
+section {
+    flex-direction: column;
+    justify-content: space-evenly;
+    align-items: center;
+    line-height: 3rem;
+}
+
+#mainDisplay {
+    display: flex;
+}
+
+#roomInput {
+    display: none;
+    flex-direction: column;
+    margin-top: 3rem;
+}
+
+h1 {
+    margin-top: 2rem;
+    margin-bottom: 0;
+}
+
+input {
+    margin: 1rem;
+    border: 0;
+    padding: 0.5rem;
+    border-radius: 10px;
+}
+
+button {
+    border: 1px solid #8b4f16;
+    border-radius: 10px;
+    padding: 1rem 2rem;
+    text-decoration: none;
+    color: black;
+    background-color: #fac898;
+    font-family: "Ubuntu", sans-serif;
+    font-size: 16px;
+    margin: 0.5rem;
+}
+
+button:hover {
+    background-color: #7c4511;
+    color: white;
+}

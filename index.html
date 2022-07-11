@@ -6,10 +6,36 @@
     <meta lang="en" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta charset="UTF-8" />
+    <link rel="stylesheet" href="css/main.css" />
+    <link rel="stylesheet" href="css/index.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@300;700&display=swap" rel="stylesheet" />
 </head>
 
 <body>
-    <a href="/elimination">Choice: elimination</a>
+    <section id="mainDisplay">
+        <h1>Let's choose!</h1>
+        <h4>For people who can't (or don't want to 😒) choose what to eat</h4>
+        <button id="elimination">Choice: elimination (2 people needed)</a>
+    </section>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        // socket.io connection
+        const socket = io();
+        socket.on('throwError', (error) => handleErrors(error))
+
+        // general functions
+        const handleClickElimination = () => window.location.href="/elimination"
+
+        const handleErrors = (error) => {
+            alert(`${error.status}: ${error.message}`)
+        }
+
+        // event listeners
+        document.getElementById('elimination').addEventListener('click', handleClickElimination)
+    </script>
 </body>
 
 </html>

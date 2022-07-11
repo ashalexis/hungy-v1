@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Let's choose!</title>
+    <meta lang="en" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
+</head>
+
+
+<style>
+    fieldset {
+        border: 0
+    }
+    
+    .foodbutton {
+        margin: 1rem;
+        border: 1px solid slategray;
+        overflow: hidden;
+        max-width: 50%;
+    }
+    
+    .foodbutton label span {
+        padding: 1rem;
+        text-align: center;
+        display: block;
+    }
+    
+    .foodbutton label input {
+        position: absolute;
+        display: none;
+    }
+    
+    .foodbutton input:checked+span {
+        background-color: red;
+    }
+</style>
+
+<body>
+    <input type="text" id="roomId" name="roomId" />
+    <button id="newRoom">Create new room</button>
+    <button id="joinRoom">Join room</button>
+
+    <section id="eliminationMethod">
+        <span id="roomIdDisplay"></span>
+        <h1>What would you like to eat?</h1>
+        <p>Remove one each until one more remains</p>
+        <form id="form">
+            <fieldset>
+                <div class="foodbutton">
+                    <label for="chinese">
+          <input type="radio" id="chinese" name="foodChoice" value="Chinese" />
+          <span>Chinese</span>
+        </label>
+                </div>
+                <div class="foodbutton">
+                    <label for="japanese">
+          <input type="radio" id="japanese" name="foodChoice" value="Japanese" />
+          <span>Japanese</span>
+        </label>
+                </div>
+                <div class="foodbutton">
+                    <label for="korean">
+          <input type="radio" id="korean" name="foodChoice" value="Korean" />
+          <span>Korean</span>
+        </label>
+                </div>
+                <div class="foodbutton">
+                    <label for="malaysian">
+          <input type="radio" id="malaysian" name="foodChoice" value="Malaysian" />
+          <span>Malaysian</span>
+        </label>
+                </div>
+                <div class="foodbutton">
+                    <label for="thai">
+          <input type="radio" id="thai" name="foodChoice" value="Thai" />
+          <span>Thai</span>
+        </label>
+                </div>
+                <div class="foodbutton">
+                    <label for="italian">
+          <input type="radio" id="italian" name="foodChoice" value="Italian" />
+          <span>Italian</span>
+        </label>
+                </div>
+                <div class="foodbutton">
+                    <label for="french">
+          <input type="radio" id="french" name="foodChoice" value="French" />
+          <span>French</span>
+        </label>
+                </div>
+                <div class="foodbutton">
+                    <label for="spanish">
+          <input type="radio" id="spanish" name="foodChoice" value="Spanish" />
+          <span>Spanish</span>
+        </label>
+                </div>
+                <div class="foodbutton">
+                    <label for="mexican">
+          <input type="radio" id="mexican" name="foodChoice" value="Mexican" />
+          <span>Mexican</span>
+        </label>
+                </div>
+                <div class="foodbutton">
+                    <label for="australian">
+          <input type="radio" id="australian" name="foodChoice" value="Australian" />
+          <span>Australian</span>
+        </label>
+                </div>
+            </fieldset>
+            <button>Submit!</button>
+    </section>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        // socket.io connection
+        const socket = io();
+
+        // document variables
+        const form = document.getElementById('form');
+        const foodChoices = document.getElementsByName('foodChoice');
+        const foodButtons = document.getElementsByClassName('foodbutton');
+        const roomIdDisplay = document.getElementById('roomIdDisplay');
+
+        // styling
+        document.getElementById('eliminationMethod').style.display = 'none';
+
+        // functions
+        const init = () => {
+            document.getElementById('eliminationMethod').style.display = 'block';
+        }
+
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const removedChoice = document.querySelector(
+                'input[name="foodChoice"]:checked'
+            ).value;
+            if (removedChoice) {
+                const room = roomIdDisplay.textContent.split(':')[1];
+                socket.emit('food choice', removedChoice, room);
+            }
+        });
+
+        // socket functions
+        const handleCreateRoom = () => {
+            socket.emit("createRoom");
+            socket.on('init', init);
+        };
+
+        const handleJoinRoom = () => {
+            const roomId = document.getElementById("roomId").value;
+            socket.emit("joinRoom", roomId);
+            socket.on('init', init);
+        };
+
+        const handleErrors = (error) => {
+            alert(`${error.status}: ${error.message}`)
+        }
+
+        socket.on('roomCode', (code) =>
+            roomIdDisplay.textContent = `Room Id:${code}`)
+        socket.on('throwError', (error) => handleErrors(error))
+
+        document.getElementById("newRoom").addEventListener("click", handleCreateRoom);
+        document.getElementById("joinRoom").addEventListener("click", handleJoinRoom);
+
+        socket.on('food choice', function(deleteChoice, roomId) {
+            if (roomId !== roomIdDisplay.textContent.split(':')[1]) {
+                return
+            }
+
+            for (let i = 0; i < foodChoices.length; i++) {
+                if (foodChoices[i].value === deleteChoice) {
+                    foodChoices[i].style.display = 'none';
+                    foodButtons[i].style.display = 'none';
+                }
+            }
+            window.scrollTo(0, document.body.scrollHeight);
+        });
+    </script>
+</body>
+
+</html>

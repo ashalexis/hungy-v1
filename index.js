@@ -11,6 +11,7 @@ const __dirname = path.dirname(__filename);
 
 // set up the express server
 import express from "express";
+import { env } from "process";
 const app = express();
 const server = createServer(app);
 
@@ -80,6 +81,8 @@ io.on("connection", (client) => {
     });
 });
 
-server.listen(3121, () => {
-    console.log("listening on port 3121");
+const port = process.env.PORT ?? 3121;
+
+server.listen(port, () => {
+    console.log(`listening on port ${port}`);
 });

@@ -216,13 +216,11 @@
             .getElementById("joinRoom")
             .addEventListener("click", handleJoinRoom);
 
-        const waitingInRoom = () => {
-            console.log("waiting!");
+        const waitingInRoom = () =>
             socket.emit(
                 "waitingInRoom",
                 document.getElementById("roomIdDisplay").textContent
             );
-        };
 
         socket.on("fullRoom", () => {
             clearInterval(waitingInterval);
@@ -237,7 +235,6 @@
         socket.on("throwError", (error) => handleErrors(error));
 
         socket.on("fullRoom", () => {
-            console.log("room full!");
             document.getElementById("loader").style.display = "none";
             document.getElementById("selection").style.display = "flex";
         });

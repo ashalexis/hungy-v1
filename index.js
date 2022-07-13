@@ -1,4 +1,5 @@
-import { nanoid } from "nanoid";
+import { customAlphabet } from "nanoid";
+import nanoidDictionary from "nanoid-dictionary";
 import { createServer } from "http";
 import { Server } from "socket.io";
 import path from "path";
@@ -27,17 +28,20 @@ app.get("/elimination", (req, res) => {
 // stylesheets
 app.use(express.static(path.join(__dirname, "/public")));
 
+// globals
 const rooms = {};
+const nanoid = customAlphabet(nanoidDictionary.alphanumeric, 8);
 
 // listening on the connection event
 io.on("connection", (client) => {
-    console.log(io.sockets.adapter.rooms);
     // making new room
     client.on("createRoom", () => {
-        let roomId = nanoid(8);
+        const roomId = nanoid();
+        const clientNumber = 1;
         rooms[client.id] = roomId;
         client.join(roomId);
-        client.emit("init", roomId);
+        const room = io.sockets.adapter.rooms.get(roomId);
+        client.emit("init", roomId, clientNumber, room.size);
     });
 
     // join room
@@ -52,9 +56,21 @@ io.on("connection", (client) => {
         } else if (room.size > 1) {
             client.emit("throwError", { status: 400, message: "Room full!", roomId });
         } else {
+            const clientNumber = 2;
             rooms[client.id] = roomId;
             client.join(roomId);
-            client.emit("init", roomId);
+            client.emit("init", roomId, clientNumber, room.size);
+        }
+
+        if (room.size === 2) {
+            client.emit("fullRoom");
+        }
+    });
+
+    client.on("waitingInRoom", (roomId) => {
+        const room = io.sockets.adapter.rooms.get(roomId);
+        if (room && room.size === 2) {
+            client.emit("fullRoom");
         }
     });
 

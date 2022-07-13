@@ -14,6 +14,7 @@
 </head>
 
 <body>
+    <span class="loader" id="loader" style="display: none"></span>
     <section id="roomInput">
         <button id="newRoom" type="button">Create new room</button>
         <span>OR...</span>
@@ -157,9 +158,9 @@
             </fieldset>
             <button>Submit!</button>
         </form>
-
-        <p>Room ID: <span id="roomIdDisplay"></span></p>
     </section>
+
+    <p>Room ID: <span id="roomIdDisplay"></span></p>
 
     <script src="/socket.io/socket.io.js"></script>
     <script>
@@ -167,8 +168,7 @@
         const socket = io();
 
         // on load
-        document.getElementById("roomIdDisplay").textContent =
-            new URLSearchParams(window.location.search).get("roomId");
+        let waitingInterval;
 
         // document variables
         const form = document.getElementById("form");
@@ -183,7 +183,6 @@
             ).value;
             if (removedChoice) {
                 const room = roomIdDisplay.textContent;
-                console.log(removedChoice, room);
                 socket.emit("food choice", removedChoice, room);
             }
         });
@@ -191,28 +190,57 @@
         // socket functions
         const handleCreateRoom = () => {
             socket.emit("createRoom");
-            socket.on("init", (roomId) => {
+            socket.on("init", (roomId, clientNo, roomSize) => {
                 document.getElementById("roomIdDisplay").textContent = roomId;
-                document.getElementById("selection").style.display = "flex";
+                document.getElementById("loader").style.display = "block";
                 document.getElementById("roomInput").style.display = "none";
+                waitingInterval = setInterval(waitingInRoom, 500);
             });
         };
 
         const handleJoinRoom = () => {
             const roomId = document.getElementById("roomId").value;
             socket.emit("joinRoom", roomId);
-            socket.on("init", (roomId) => {
+            socket.on("init", (roomId, clientNo, roomSize) => {
                 document.getElementById("roomIdDisplay").textContent = roomId;
-                document.getElementById("selection").style.display = "flex";
+                document.getElementById("loader").style.display = "block";
                 document.getElementById("roomInput").style.display = "none";
+                waitingInterval = setInterval(waitingInRoom, 500);
             });
         };
+
+        document
+            .getElementById("newRoom")
+            .addEventListener("click", handleCreateRoom);
+        document
+            .getElementById("joinRoom")
+            .addEventListener("click", handleJoinRoom);
+
+        const waitingInRoom = () => {
+            console.log("waiting!");
+            socket.emit(
+                "waitingInRoom",
+                document.getElementById("roomIdDisplay").textContent
+            );
+        };
+
+        socket.on("fullRoom", () => {
+            clearInterval(waitingInterval);
+            document.getElementById("loader").style.display = "none";
+            document.getElementById("selection").style.display = "flex";
+        });
 
         const handleErrors = (error) => {
             alert(`${error.status}: ${error.message}`);
         };
 
         socket.on("throwError", (error) => handleErrors(error));
+
+        socket.on("fullRoom", () => {
+            console.log("room full!");
+            document.getElementById("loader").style.display = "none";
+            document.getElementById("selection").style.display = "flex";
+        });
 
         socket.on("food choice", function(deleteChoice, roomId) {
             if (roomId !== roomIdDisplay.textContent) {
@@ -227,13 +255,6 @@
             }
             window.scrollTo(0, document.body.scrollHeight);
         });
-
-        document
-            .getElementById("newRoom")
-            .addEventListener("click", handleCreateRoom);
-        document
-            .getElementById("joinRoom")
-            .addEventListener("click", handleJoinRoom);
     </script>
 </body>
 

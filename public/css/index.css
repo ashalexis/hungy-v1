@@ -7,6 +7,9 @@ section {
 
 #mainDisplay {
     display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
 }
 
 #roomInput {
@@ -25,21 +28,4 @@ input {
     border: 0;
     padding: 0.5rem;
     border-radius: 10px;
-}
-
-button {
-    border: 1px solid #8b4f16;
-    border-radius: 10px;
-    padding: 1rem 2rem;
-    text-decoration: none;
-    color: black;
-    background-color: #fac898;
-    font-family: "Ubuntu", sans-serif;
-    font-size: 16px;
-    margin: 0.5rem;
-}
-
-button:hover {
-    background-color: #7c4511;
-    color: white;
 }

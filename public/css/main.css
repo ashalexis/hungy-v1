@@ -8,12 +8,12 @@ h1 {
 }
 
 button {
-    border: 1px solid #8b4f16;
+    border: 0;
     border-radius: 10px;
     padding: 1rem;
     text-decoration: none;
-    color: black;
-    background-color: #ffd6b0;
+    color: #fff;
+    background-color: #7c4511;
     font-family: "Ubuntu", sans-serif;
     font-size: 16px;
     margin: 0.5rem;
@@ -21,6 +21,11 @@ button {
 }
 
 button:hover {
-    background-color: #7c4511;
-    color: white;
+    background-color: #522d0b;
+}
+
+button:disabled {
+    background-color: #7c451160;
+    color: rgba(255, 255, 255, 0.404);
+    border: 0;
 }

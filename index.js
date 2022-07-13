@@ -70,12 +70,13 @@ io.on("connection", (client) => {
     client.on("waitingInRoom", (roomId) => {
         const room = io.sockets.adapter.rooms.get(roomId);
         if (room && room.size === 2) {
-            client.emit("fullRoom");
+            client.emit("startRoom", 1);
         }
     });
 
-    client.on("food choice", (choice, roomId) => {
-        io.emit("food choice", choice, roomId);
+    client.on("food choice", (choice, roomId, clientNumber) => {
+        let turn = clientNumber === 1 ? 2 : 1;
+        io.emit("food choice", choice, roomId, turn);
     });
 });
 

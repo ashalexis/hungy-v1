@@ -14,7 +14,7 @@
 </head>
 
 <body>
-    <span class="loader" id="loader" style="display: none"></span>
+    <span class="loader" id="loader"></span>
     <section id="roomInput">
         <button id="newRoom" type="button">Create new room</button>
         <span>OR...</span>
@@ -25,6 +25,7 @@
 
     <section id="selection">
         <h1>What would you like to eat?</h1>
+        <h3 id="yourTurn"></h3>
         <p>Remove one each until one more remains</p>
         <form id="form">
             <fieldset>
@@ -156,7 +157,7 @@
 						</label>
                 </div>
             </fieldset>
-            <button>Submit!</button>
+            <button id="submitButton">Submit!</button>
         </form>
     </section>
 
@@ -169,12 +170,28 @@
 
         // on load
         let waitingInterval;
+        let clientNumber;
 
         // document variables
         const form = document.getElementById("form");
         const foodChoices = document.getElementsByName("foodChoice");
         const foodButtons = document.getElementsByClassName("foodbutton");
+        const submitButton = document.getElementById("submitButton");
         const roomIdDisplay = document.getElementById("roomIdDisplay");
+        const loader = document.getElementById("loader");
+        const yourTurn = document.getElementById("yourTurn");
+
+        loader.style.display = "none";
+
+        const checkTurn = (clientNo) => {
+            if (clientNo === clientNumber) {
+                submitButton.disabled = false;
+                yourTurn.textContent = "It's your turn!";
+            } else {
+                submitButton.disabled = true;
+                yourTurn.textContent = "Not your turn...";
+            }
+        };
 
         form.addEventListener("submit", function(e) {
             e.preventDefault();
@@ -183,7 +200,7 @@
             ).value;
             if (removedChoice) {
                 const room = roomIdDisplay.textContent;
-                socket.emit("food choice", removedChoice, room);
+                socket.emit("food choice", removedChoice, room, clientNumber);
             }
         });
 
@@ -191,8 +208,9 @@
         const handleCreateRoom = () => {
             socket.emit("createRoom");
             socket.on("init", (roomId, clientNo, roomSize) => {
-                document.getElementById("roomIdDisplay").textContent = roomId;
-                document.getElementById("loader").style.display = "block";
+                roomIdDisplay.textContent = roomId;
+                loader.style.display = "block";
+                clientNumber = clientNo;
                 document.getElementById("roomInput").style.display = "none";
                 waitingInterval = setInterval(waitingInRoom, 500);
             });
@@ -202,8 +220,9 @@
             const roomId = document.getElementById("roomId").value;
             socket.emit("joinRoom", roomId);
             socket.on("init", (roomId, clientNo, roomSize) => {
-                document.getElementById("roomIdDisplay").textContent = roomId;
-                document.getElementById("loader").style.display = "block";
+                roomIdDisplay.textContent = roomId;
+                loader.style.display = "block";
+                clientNumber = clientNo;
                 document.getElementById("roomInput").style.display = "none";
                 waitingInterval = setInterval(waitingInRoom, 500);
             });
@@ -217,14 +236,12 @@
             .addEventListener("click", handleJoinRoom);
 
         const waitingInRoom = () =>
-            socket.emit(
-                "waitingInRoom",
-                document.getElementById("roomIdDisplay").textContent
-            );
+            socket.emit("waitingInRoom", roomIdDisplay.textContent);
 
-        socket.on("fullRoom", () => {
+        socket.on("startRoom", (clientNo) => {
             clearInterval(waitingInterval);
-            document.getElementById("loader").style.display = "none";
+            checkTurn(clientNo);
+            loader.style.display = "none";
             document.getElementById("selection").style.display = "flex";
         });
 
@@ -235,11 +252,11 @@
         socket.on("throwError", (error) => handleErrors(error));
 
         socket.on("fullRoom", () => {
-            document.getElementById("loader").style.display = "none";
+            loader.style.display = "none";
             document.getElementById("selection").style.display = "flex";
         });
 
-        socket.on("food choice", function(deleteChoice, roomId) {
+        socket.on("food choice", function(deleteChoice, roomId, clientNo) {
             if (roomId !== roomIdDisplay.textContent) {
                 return;
             }
@@ -250,7 +267,18 @@
                     foodButtons[i].style.display = "none";
                 }
             }
+
+            checkTurn(clientNo);
             window.scrollTo(0, document.body.scrollHeight);
+
+            const numOfChoicesRemaining = Array.from(foodChoices)
+                .map((choice) => choice.style.display)
+                .filter((display) => display !== "none").length;
+
+            if (numOfChoicesRemaining === 1) {
+                submitButton.disabled = true;
+                yourTurn.textContent = "Your choice has been made!";
+            }
         });
     </script>
 </body>

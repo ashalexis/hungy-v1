@@ -9,7 +9,8 @@
     },
     "license": "MIT",
     "scripts": {
-        "dev": "nodemon index.js"
+        "dev": "nodemon index.js",
+        "build": "node index.js"
     },
     "type": "module",
     "dependencies": {

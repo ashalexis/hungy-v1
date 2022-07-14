@@ -62,7 +62,7 @@ io.on("connection", (client) => {
             client.emit("init", roomId, clientNumber, room.size);
         }
 
-        if (room.size === 2) {
+        if (room && room.size === 2) {
             client.emit("fullRoom");
         }
     });

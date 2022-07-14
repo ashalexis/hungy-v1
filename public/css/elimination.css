@@ -25,8 +25,7 @@ fieldset {
 .foodbutton {
     border-radius: 10px;
     text-decoration: none;
-    color: black;
-    background-color: #ffd6b0;
+    color: #1f1f1f;
     font-size: 16px;
     margin: 0.5rem;
     max-width: 40%;
@@ -82,7 +81,7 @@ input {
     position: absolute;
     left: 0;
     bottom: 0;
-    background: #000000;
+    background: #1f1f1f;
     width: 64px;
     height: 32px;
     border-radius: 0 0 50px 50px;
@@ -94,7 +93,7 @@ input {
     position: absolute;
     left: 50%;
     top: 0;
-    background: rgb(153, 58, 29);
+    background: #a80000;
     width: 24px;
     height: 24px;
     transform: translateX(-50%) rotate(0deg);

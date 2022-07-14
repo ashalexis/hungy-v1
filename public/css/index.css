@@ -23,6 +23,10 @@ h1 {
     margin-bottom: 0;
 }
 
+h4 {
+    text-align: center;
+}
+
 input {
     margin: 1rem;
     border: 0;

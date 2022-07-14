@@ -11,7 +11,6 @@ const __dirname = path.dirname(__filename);
 
 // set up the express server
 import express from "express";
-import { env } from "process";
 const app = express();
 const server = createServer(app);
 

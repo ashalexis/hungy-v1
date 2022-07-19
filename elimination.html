@@ -92,6 +92,17 @@
 						</label>
                 </div>
                 <div class="foodbutton">
+                    <label for="vietnamese">
+							<input
+								type="radio"
+								id="vietnamese"
+								name="foodChoice"
+								value="Vietnamese"
+							/>
+							<span>Vietnamese</span>
+						</label>
+                </div>
+                <div class="foodbutton">
                     <label for="lebanese">
 							<input
 								type="radio"
@@ -146,17 +157,6 @@
 							<span>Mexican</span>
 						</label>
                 </div>
-                <div class="foodbutton">
-                    <label for="australian">
-							<input
-								type="radio"
-								id="australian"
-								name="foodChoice"
-								value="Australian"
-							/>
-							<span>Australian</span>
-						</label>
-                </div>
             </fieldset>
             <button id="submitButton">Submit!</button>
         </form>
@@ -184,16 +184,6 @@
 
         loader.style.display = "none";
 
-        const checkTurn = (clientNo) => {
-            if (clientNo === clientNumber) {
-                submitButton.disabled = false;
-                yourTurn.textContent = "It's your turn!";
-            } else {
-                submitButton.disabled = true;
-                yourTurn.textContent = "Not your turn...";
-            }
-        };
-
         form.addEventListener("submit", function(e) {
             e.preventDefault();
             const removedChoice = document.querySelector(
@@ -205,28 +195,44 @@
             }
         });
 
+        // common functions
+        const onInitRoom = (roomId, clientNo, roomSize) => {
+            roomIdDisplay.textContent = roomId;
+            loader.style.display = "block";
+            clientNumber = clientNo;
+            document.getElementById("roomInput").style.display = "none";
+            waitingInterval = setInterval(waitingInRoom, 500);
+        };
+
+        const checkTurn = (clientNo) => {
+            if (clientNo === clientNumber) {
+                submitButton.disabled = false;
+                yourTurn.textContent = "It's your turn!";
+            } else {
+                submitButton.disabled = true;
+                yourTurn.textContent = "Not your turn...";
+            }
+        };
+
+        const displayRoom = () => {
+            loader.style.display = "none";
+            document.getElementById("selection").style.display = "flex";
+        };
+
         // socket functions
         const handleCreateRoom = () => {
             socket.emit("createRoom");
-            socket.on("init", (roomId, clientNo, roomSize) => {
-                roomIdDisplay.textContent = roomId;
-                loader.style.display = "block";
-                clientNumber = clientNo;
-                document.getElementById("roomInput").style.display = "none";
-                waitingInterval = setInterval(waitingInRoom, 500);
-            });
+            socket.on("init", (roomId, clientNo, roomSize) =>
+                onInitRoom(roomId, clientNo, roomSize)
+            );
         };
 
         const handleJoinRoom = () => {
             const roomId = document.getElementById("roomId").value;
             socket.emit("joinRoom", roomId);
-            socket.on("init", (roomId, clientNo, roomSize) => {
-                roomIdDisplay.textContent = roomId;
-                loader.style.display = "block";
-                clientNumber = clientNo;
-                document.getElementById("roomInput").style.display = "none";
-                waitingInterval = setInterval(waitingInRoom, 500);
-            });
+            socket.on("init", (roomId, clientNo, roomSize) =>
+                onInitRoom(roomId, clientNo, roomSize)
+            );
         };
 
         document
@@ -241,9 +247,10 @@
 
         socket.on("startRoom", (clientNo) => {
             clearInterval(waitingInterval);
+
             checkTurn(clientNo);
-            loader.style.display = "none";
-            document.getElementById("selection").style.display = "flex";
+
+            displayRoom();
         });
 
         const handleErrors = (error) => {
@@ -253,28 +260,27 @@
         socket.on("throwError", (error) => handleErrors(error));
 
         socket.on("fullRoom", () => {
-            loader.style.display = "none";
-            document.getElementById("selection").style.display = "flex";
+            displayRoom();
         });
 
-        socket.on("food choice", function(deleteChoice, roomId, clientNo) {
+        socket.on("food choice", async function(deleteChoice, roomId, clientNo) {
             if (roomId !== roomIdDisplay.textContent) {
                 return;
             }
 
             for (let i = 0; i < foodChoices.length; i++) {
                 if (foodChoices[i].value === deleteChoice) {
-                    foodChoices[i].style.display = "none";
-                    foodButtons[i].style.display = "none";
+                    foodButtons[i].classList.add("removed");
                 }
             }
 
             checkTurn(clientNo);
+
             window.scrollTo(0, document.body.scrollHeight);
 
-            const numOfChoicesRemaining = Array.from(foodChoices)
-                .map((choice) => choice.style.display)
-                .filter((display) => display !== "none").length;
+            const numOfChoicesRemaining = Array.from(foodButtons)
+                .map((choice) => choice.classList)
+                .filter((choice) => !choice.contains("removed")).length;
 
             if (numOfChoicesRemaining === 1) {
                 submitButton.disabled = true;

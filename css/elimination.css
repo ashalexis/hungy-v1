@@ -46,6 +46,11 @@ fieldset {
     text-decoration: line-through;
 }
 
+.foodbutton.removed {
+    text-decoration: line-through;
+    color: #a80000;
+}
+
 input {
     margin: 1rem;
     border: 0;

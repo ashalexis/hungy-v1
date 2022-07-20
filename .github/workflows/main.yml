@@ -1,4 +1,4 @@
-name: CI to Docker Hub
+name: Build on Docker & Deploy to Heroku
 
 on:
   push:

@@ -9,6 +9,7 @@
     },
     "license": "MIT",
     "scripts": {
+        "ci": "rm -rf node_modules && yarn install --frozen-lockfile",
         "dev": "nodemon index.js",
         "prepare": "husky install",
         "start": "node index.js",

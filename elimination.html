@@ -29,135 +29,7 @@
         <h3 id="yourTurn"></h3>
         <p>Remove one each until one more remains</p>
         <form id="form">
-            <fieldset>
-                <div class="foodbutton">
-                    <label for="chinese">
-							<input
-								type="radio"
-								id="chinese"
-								name="foodChoice"
-								value="Chinese"
-							/>
-							<span>Chinese</span>
-						</label>
-                </div>
-                <div class="foodbutton">
-                    <label for="indian">
-							<input
-								type="radio"
-								id="indian"
-								name="foodChoice"
-								value="Indian"
-							/>
-							<span>Indian</span>
-						</label>
-                </div>
-                <div class="foodbutton">
-                    <label for="japanese">
-							<input
-								type="radio"
-								id="japanese"
-								name="foodChoice"
-								value="Japanese"
-							/>
-							<span>Japanese</span>
-						</label>
-                </div>
-                <div class="foodbutton">
-                    <label for="korean">
-							<input
-								type="radio"
-								id="korean"
-								name="foodChoice"
-								value="Korean"
-							/>
-							<span>Korean</span>
-						</label>
-                </div>
-                <div class="foodbutton">
-                    <label for="malaysian">
-							<input
-								type="radio"
-								id="malaysian"
-								name="foodChoice"
-								value="Malaysian"
-							/>
-							<span>Malaysian</span>
-						</label>
-                </div>
-                <div class="foodbutton">
-                    <label for="thai">
-							<input type="radio" id="thai" name="foodChoice" value="Thai" />
-							<span>Thai</span>
-						</label>
-                </div>
-                <div class="foodbutton">
-                    <label for="vietnamese">
-							<input
-								type="radio"
-								id="vietnamese"
-								name="foodChoice"
-								value="Vietnamese"
-							/>
-							<span>Vietnamese</span>
-						</label>
-                </div>
-                <div class="foodbutton">
-                    <label for="lebanese">
-							<input
-								type="radio"
-								id="lebanese"
-								name="foodChoice"
-								value="Lebanese"
-							/>
-							<span>Lebanese</span>
-						</label>
-                </div>
-                <div class="foodbutton">
-                    <label for="italian">
-							<input
-								type="radio"
-								id="italian"
-								name="foodChoice"
-								value="Italian"
-							/>
-							<span>Italian</span>
-						</label>
-                </div>
-                <div class="foodbutton">
-                    <label for="french">
-							<input
-								type="radio"
-								id="french"
-								name="foodChoice"
-								value="French"
-							/>
-							<span>French</span>
-						</label>
-                </div>
-                <div class="foodbutton">
-                    <label for="spanish">
-							<input
-								type="radio"
-								id="spanish"
-								name="foodChoice"
-								value="Spanish"
-							/>
-							<span>Spanish</span>
-						</label>
-                </div>
-                <div class="foodbutton">
-                    <label for="mexican">
-							<input
-								type="radio"
-								id="mexican"
-								name="foodChoice"
-								value="Mexican"
-							/>
-							<span>Mexican</span>
-						</label>
-                </div>
-            </fieldset>
+            <fieldset id="selectionField"></fieldset>
             <button id="submitButton">Submit!</button>
         </form>
     </section>
@@ -181,14 +53,18 @@
         const roomIdDisplay = document.getElementById("roomIdDisplay");
         const loader = document.getElementById("loader");
         const yourTurn = document.getElementById("yourTurn");
+        const selectionArea = document.getElementById("selection");
+        const selectionFieldset = document.getElementById("selectionField");
 
         loader.style.display = "none";
 
         form.addEventListener("submit", function(e) {
             e.preventDefault();
-            const removedChoice = document.querySelector(
-                'input[name="foodChoice"]:checked'
-            ).value;
+            const removedChoice = !document.querySelector(
+                    'input[name="foodChoice"]:checked'
+                ).disabled ?
+                document.querySelector('input[name="foodChoice"]:checked').value :
+                "";
             if (removedChoice) {
                 const room = roomIdDisplay.textContent;
                 socket.emit("food choice", removedChoice, room, clientNumber);
@@ -216,7 +92,29 @@
 
         const displayRoom = () => {
             loader.style.display = "none";
-            document.getElementById("selection").style.display = "flex";
+            selectionArea.style.display = "flex";
+        };
+
+        const generateOption = (option) => {
+            const optionInput = document.createElement("input");
+            optionInput.type = "radio";
+            optionInput.name = "foodChoice";
+            optionInput.value = option.value;
+            optionInput.innerHTML = `<span>${option.value}</span>`;
+            optionInput.id = option.id;
+
+            const optionSpan = document.createElement("span");
+            optionSpan.textContent = option.value;
+
+            const optionLabel = document.createElement("label");
+            optionLabel.htmlFor = option.id;
+            optionLabel.appendChild(optionInput);
+            optionLabel.appendChild(optionSpan);
+            const optionDiv = document.createElement("div");
+            optionDiv.classList.add("foodbutton");
+            optionDiv.appendChild(optionLabel);
+
+            selectionFieldset.appendChild(optionDiv);
         };
 
         // socket functions
@@ -245,10 +143,13 @@
         const waitingInRoom = () =>
             socket.emit("waitingInRoom", roomIdDisplay.textContent);
 
-        socket.on("startRoom", (clientNo) => {
+        socket.on("startRoom", (foodOptions, clientNo) => {
             clearInterval(waitingInterval);
 
             checkTurn(clientNo);
+
+            console.log(foodOptions);
+            foodOptions.forEach(generateOption);
 
             displayRoom();
         });
@@ -259,10 +160,6 @@
 
         socket.on("throwError", (error) => handleErrors(error));
 
-        socket.on("fullRoom", () => {
-            displayRoom();
-        });
-
         socket.on("food choice", async function(deleteChoice, roomId, clientNo) {
             if (roomId !== roomIdDisplay.textContent) {
                 return;
@@ -270,6 +167,7 @@
 
             for (let i = 0; i < foodChoices.length; i++) {
                 if (foodChoices[i].value === deleteChoice) {
+                    foodChoices[i].disabled = true;
                     foodButtons[i].classList.add("removed");
                 }
             }

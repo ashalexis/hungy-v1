@@ -4,6 +4,7 @@ import { createServer } from "http";
 import { Server } from "socket.io";
 import path from "path";
 import { fileURLToPath } from "url";
+import { foodOptions } from "./constants.js";
 
 const __filename = fileURLToPath(
     import.meta.url);
@@ -25,7 +26,7 @@ app.get("/elimination", (req, res) => {
     res.sendFile(path.join(__dirname, "/elimination.html"));
 });
 
-// stylesheets
+// static files
 app.use(express.static(path.join(__dirname, ".")));
 
 // globals
@@ -60,9 +61,6 @@ io.on("connection", (client) => {
             rooms[client.id] = roomId;
             client.join(roomId);
             client.emit("init", roomId, clientNumber, room.size);
-        }
-
-        if (room && room.size === 2) {
             client.emit("fullRoom");
         }
     });
@@ -70,7 +68,7 @@ io.on("connection", (client) => {
     client.on("waitingInRoom", (roomId) => {
         const room = io.sockets.adapter.rooms.get(roomId);
         if (room && room.size === 2) {
-            client.emit("startRoom", 1);
+            client.emit("startRoom", foodOptions, 1);
         }
     });
 

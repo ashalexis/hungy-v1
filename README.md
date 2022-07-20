@@ -11,6 +11,12 @@ This site was created for this very purpose, so no one will ever have to pull ha
 - Express
 - Socket IO
 
+### Setting the app up
+
+to install: `yarn`
+
+to run the app: `yarn dev`
+
 ## Special Shout-outs
 
 Tim please stop asking me what to eat everyday dangit

@@ -10,7 +10,10 @@
     "license": "MIT",
     "scripts": {
         "dev": "nodemon index.js",
-        "start": "node index.js"
+        "prepare": "husky install",
+        "start": "node index.js",
+        "test:e2e": "cypress run",
+        "test:e2e:open": "cypress open"
     },
     "type": "module",
     "dependencies": {
@@ -22,6 +25,8 @@
         "url": "^0.11.0"
     },
     "devDependencies": {
+        "cypress": "^10.3.1",
+        "husky": "^8.0.1",
         "nodemon": "^2.0.19"
     }
 }

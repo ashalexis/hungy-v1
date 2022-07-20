@@ -11,31 +11,35 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@300;700&display=swap" rel="stylesheet" />
-    <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
+    <link rel="icon" type="image/x-icon" href="/images/favicon.ico" />
 </head>
 
 <body>
     <section id="mainDisplay">
         <h1>Let's choose!</h1>
         <h4>For people who want to eat...<br />But can't choose</h4>
-        <button id="elimination">Choice: elimination (2 people needed)</a>
+        <button id="elimination">Elimination (2 people)</button>
+        <button id="matching">Random matchup (minimum 3 people)</button>
     </section>
 
     <script src="/socket.io/socket.io.js"></script>
     <script>
         // socket.io connection
         const socket = io();
-        socket.on('throwError', (error) => handleErrors(error))
+        socket.on("throwError", (error) => handleErrors(error));
 
         // general functions
-        const handleClickElimination = () => window.location.href="/elimination"
+        const handleClickElimination = () =>
+            (window.location.href = "/elimination");
 
         const handleErrors = (error) => {
-            alert(`${error.status}: ${error.message}`)
-        }
+            alert(`${error.status}: ${error.message}`);
+        };
 
         // event listeners
-        document.getElementById('elimination').addEventListener('click', handleClickElimination)
+        document
+            .getElementById("elimination")
+            .addEventListener("click", handleClickElimination);
     </script>
 </body>
 

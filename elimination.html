@@ -27,7 +27,9 @@
     <section id="selection">
         <h1>What would you like to eat?</h1>
         <h3 id="yourTurn"></h3>
-        <p>Remove one each until one more remains</p>
+        <p>
+            Each player selects one option to remove, then hits "Submit".<br />Players take turns until one choice remains.
+        </p>
         <form id="form">
             <fieldset id="selectionField"></fieldset>
             <button id="submitButton">Submit!</button>
@@ -84,9 +86,11 @@
             if (clientNo === clientNumber) {
                 submitButton.disabled = false;
                 yourTurn.textContent = "It's your turn!";
+                foodChoices.forEach((input) => (input.disabled = false));
             } else {
                 submitButton.disabled = true;
                 yourTurn.textContent = "Not your turn...";
+                foodChoices.forEach((input) => (input.disabled = true));
             }
         };
 
@@ -146,9 +150,9 @@
         socket.on("startRoom", (foodOptions, clientNo) => {
             clearInterval(waitingInterval);
 
-            checkTurn(clientNo);
-
             foodOptions.forEach(generateOption);
+
+            checkTurn(clientNo);
 
             displayRoom();
         });

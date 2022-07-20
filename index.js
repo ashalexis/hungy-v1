@@ -61,7 +61,6 @@ io.on("connection", (client) => {
             rooms[client.id] = roomId;
             client.join(roomId);
             client.emit("init", roomId, clientNumber, room.size);
-            client.emit("fullRoom");
         }
     });
 

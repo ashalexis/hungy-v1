@@ -54,4 +54,20 @@ export const foodOptions = [{
         id: "greek",
         value: "Greek",
     },
+    {
+        id: "australian",
+        value: "Australian",
+    },
+    {
+        id: "american",
+        value: "American",
+    },
+    {
+        id: "cajun",
+        value: "Cajun",
+    },
+    {
+        id: "hungarian",
+        value: "Hungarian",
+    },
 ];

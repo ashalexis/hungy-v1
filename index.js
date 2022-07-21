@@ -73,13 +73,13 @@ eliminationSpace.on("connection", (client) => {
     client.on("waitingInRoom", (roomId) => {
         const room = eliminationSpace.adapter.rooms.get(roomId);
         if (room && room.size === 2) {
-            eliminationSpace.emit("startRoom", foodOptions, 1);
+            client.emit("startRoom", foodOptions, 1);
         }
     });
 
     client.on("food choice", (choice, roomId, clientNumber) => {
         let turn = clientNumber === 1 ? 2 : 1;
-        eliminationSpace.emit("food choice", choice, roomId, turn);
+        eliminationSpace.to(roomId).emit("food choice", choice, roomId, turn);
     });
 });
 

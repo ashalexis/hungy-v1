@@ -26,6 +26,10 @@ app.get("/elimination", (req, res) => {
     res.sendFile(path.join(__dirname, "/elimination.html"));
 });
 
+app.get("/matchup", (req, res) => {
+    res.sendFile(path.join(__dirname, "/matchup.html"));
+});
+
 // static files
 app.use(express.static(path.join(__dirname, ".")));
 
@@ -33,21 +37,23 @@ app.use(express.static(path.join(__dirname, ".")));
 const rooms = {};
 const nanoid = customAlphabet(nanoidDictionary.alphanumeric, 8);
 
+const eliminationSpace = io.of("/elimination");
+
 // listening on the connection event
-io.on("connection", (client) => {
+eliminationSpace.on("connection", (client) => {
     // making new room
     client.on("createRoom", () => {
         const roomId = nanoid();
         const clientNumber = 1;
         rooms[client.id] = roomId;
         client.join(roomId);
-        const room = io.sockets.adapter.rooms.get(roomId);
+        const room = eliminationSpace.adapter.rooms.get(roomId);
         client.emit("init", roomId, clientNumber, room.size);
     });
 
     // join room
     client.on("joinRoom", (roomId) => {
-        const room = io.sockets.adapter.rooms.get(roomId);
+        const room = eliminationSpace.adapter.rooms.get(roomId);
         if (!room) {
             client.emit("throwError", {
                 status: 404,
@@ -65,15 +71,15 @@ io.on("connection", (client) => {
     });
 
     client.on("waitingInRoom", (roomId) => {
-        const room = io.sockets.adapter.rooms.get(roomId);
+        const room = eliminationSpace.adapter.rooms.get(roomId);
         if (room && room.size === 2) {
-            client.emit("startRoom", foodOptions, 1);
+            eliminationSpace.emit("startRoom", foodOptions, 1);
         }
     });
 
     client.on("food choice", (choice, roomId, clientNumber) => {
         let turn = clientNumber === 1 ? 2 : 1;
-        io.emit("food choice", choice, roomId, turn);
+        eliminationSpace.emit("food choice", choice, roomId, turn);
     });
 });
 

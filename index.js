@@ -4,6 +4,7 @@ import { createServer } from "http";
 import { Server } from "socket.io";
 import path from "path";
 import { fileURLToPath } from "url";
+import express from "express";
 import { foodOptions } from "./constants.js";
 
 const __filename = fileURLToPath(
@@ -11,7 +12,6 @@ const __filename = fileURLToPath(
 const __dirname = path.dirname(__filename);
 
 // set up the express server
-import express from "express";
 const app = express();
 const server = createServer(app);
 
@@ -35,9 +35,11 @@ app.use(express.static(path.join(__dirname, ".")));
 
 // globals
 const rooms = {};
+const matchupChoices = new Map();
 const nanoid = customAlphabet(nanoidDictionary.alphanumeric, 8);
 
 const eliminationSpace = io.of("/elimination");
+const matchupSpace = io.of("/matchup");
 
 // listening on the connection event
 eliminationSpace.on("connection", (client) => {
@@ -80,6 +82,70 @@ eliminationSpace.on("connection", (client) => {
     client.on("food choice", (choice, roomId, clientNumber) => {
         let turn = clientNumber === 1 ? 2 : 1;
         eliminationSpace.to(roomId).emit("food choice", choice, roomId, turn);
+    });
+});
+
+matchupSpace.on("connection", (client) => {
+    // making new room
+    client.on("createRoom", () => {
+        const roomId = nanoid();
+        rooms[client.id] = roomId;
+        client.join(roomId);
+        const room = matchupSpace.adapter.rooms.get(roomId);
+        client.emit("init", roomId, room.size);
+    });
+
+    // join room
+    client.on("joinRoom", (roomId) => {
+        const room = matchupSpace.adapter.rooms.get(roomId);
+        if (!room) {
+            client.emit("throwError", {
+                status: 404,
+                message: "Room not found!",
+                roomId,
+            });
+        } else {
+            rooms[client.id] = roomId;
+            client.join(roomId);
+            client.emit("init", roomId, room.size);
+            matchupSpace.to(roomId).emit("roomSize", room.size);
+        }
+    });
+
+    client.on("playerReady", (roomId) => {
+        const room = matchupSpace.adapter.rooms.get(roomId);
+        matchupChoices.set(roomId, {
+            ...matchupChoices.get(roomId),
+            [client.id]: [],
+        });
+
+        console.log(Object.keys(matchupChoices.get(roomId)).length, room.size);
+        if (Object.keys(matchupChoices.get(roomId)).length === room.size) {
+            matchupSpace.to(roomId).emit("startRoom", foodOptions, roomId);
+        }
+    });
+
+    client.on("sendChoices", (foodChoices, roomId) => {
+        // obj will look like { client.id : foodChoices }
+        matchupChoices.set(roomId, {
+            ...matchupChoices.get(roomId),
+            [client.id]: foodChoices,
+        });
+        console.log(matchupChoices);
+    });
+
+    client.on("prelimChoices", (foodChoices, clientNumber) => {
+        // make map of choices
+    });
+
+    client.on("disconnecting", (reason) => {
+        for (const roomId of client.rooms) {
+            if (roomId !== client.id) {
+                const room = matchupSpace.adapter.rooms.get(roomId);
+                room.delete(client.id);
+                client.to(roomId).emit("roomSize", room.size);
+            }
+        }
     });
 });
 

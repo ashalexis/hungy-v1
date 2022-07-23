@@ -7,7 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta charset="UTF-8" />
     <link rel="stylesheet" href="./css/main.css" />
-    <link rel="stylesheet" href="./css/elimination.css" />
+    <link rel="stylesheet" href="./css/matchup.css" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@300;700&display=swap" rel="stylesheet" />
@@ -15,21 +15,31 @@
 </head>
 
 <body>
-    <span class="loader" id="loader"></span>
     <section id="roomInput">
-        <button id="newRoom" type="button">Create new room</button>
+        <button id="newRoom" type="button" onClick="handleCreateRoom()">
+				Create new room
+			</button>
         <span>OR...</span>
         <label for="roomId">Room #:</label>
         <input type="text" id="roomId" name="roomId" />
-        <button id="joinRoom" type="button">Join room</button>
+        <button id="joinRoom" type="button" onClick="handleJoinRoom()">
+				Join room
+			</button>
+    </section>
+
+    <section id="loadingRoom">
+        <span class="loader" id="loader"></span>
+        <h3>Number of people in the room: <span id="playersInRoom"></span></h3>
+        <button id="playerReadyButton" onClick="handleStartRoom()">Ready?</button>
     </section>
 
     <section id="selection">
         <h1>What would you like to eat?</h1>
-        <h3 id="yourTurn"></h3>
         <p>
-            Each player selects one option to remove, then hits "Submit".<br />Players take turns until one choice remains.
+            Every player chooses as many food options as they would like in 30 seconds.
+            <br /> Players can submit their choices or wait until they run out of time.
         </p>
+        <h3 id="timer"></h3>
         <form id="form">
             <fieldset id="selectionField"></fieldset>
             <button id="submitButton">Submit!</button>
@@ -41,11 +51,10 @@
     <script src="/socket.io/socket.io.js"></script>
     <script>
         // socket.io connection
-        const socket = io("/elimination");
+        const socket = io("/matchup");
 
         // on load
-        let waitingInterval;
-        let clientNumber;
+        let timerInterval;
 
         // document variables
         const form = document.getElementById("form");
@@ -53,55 +62,40 @@
         const foodButtons = document.getElementsByClassName("foodbutton");
         const submitButton = document.getElementById("submitButton");
         const roomIdDisplay = document.getElementById("roomIdDisplay");
-        const loader = document.getElementById("loader");
+        const loadingRoom = document.getElementById("loadingRoom");
+        const playersInRoom = document.getElementById("playersInRoom");
+        const playerReadyButton = document.getElementById("playerReadyButton");
         const yourTurn = document.getElementById("yourTurn");
         const selectionArea = document.getElementById("selection");
         const selectionFieldset = document.getElementById("selectionField");
 
-        loader.style.display = "none";
+        loadingRoom.style.display = "none";
 
         form.addEventListener("submit", function(e) {
             e.preventDefault();
-            const removedChoice = !document.querySelector(
-                    'input[name="foodChoice"]:checked'
-                ).disabled ?
-                document.querySelector('input[name="foodChoice"]:checked').value :
-                "";
-            if (removedChoice) {
-                const room = roomIdDisplay.textContent;
-                socket.emit("food choice", removedChoice, room, clientNumber);
-            }
+            const choices = Array.from(document.getElementsByTagName("input"))
+                .filter((choice) => choice.checked)
+                .map((choice) => choice.value);
+            console.log(choices);
+            socket.emit("sendChoices", choices, roomIdDisplay.textContent);
         });
 
         // common functions
-        const onInitRoom = (roomId, clientNo, roomSize) => {
+        const onInitRoom = (roomId, roomSize) => {
             roomIdDisplay.textContent = roomId;
-            loader.style.display = "block";
-            clientNumber = clientNo;
+            loadingRoom.style.display = "flex";
+            playersInRoom.textContent = roomSize;
             document.getElementById("roomInput").style.display = "none";
-            waitingInterval = setInterval(waitingInRoom, 500);
-        };
-
-        const checkTurn = (clientNo) => {
-            if (clientNo === clientNumber) {
-                submitButton.disabled = false;
-                yourTurn.textContent = "It's your turn!";
-                foodChoices.forEach((input) => (input.disabled = false));
-            } else {
-                submitButton.disabled = true;
-                yourTurn.textContent = "Not your turn...";
-                foodChoices.forEach((input) => (input.disabled = true));
-            }
         };
 
         const displayRoom = () => {
-            loader.style.display = "none";
+            loadingRoom.style.display = "none";
             selectionArea.style.display = "flex";
         };
 
         const generateOption = (option) => {
             const optionInput = document.createElement("input");
-            optionInput.type = "radio";
+            optionInput.type = "checkbox";
             optionInput.name = "foodChoice";
             optionInput.value = option.value;
             optionInput.id = option.id;
@@ -123,36 +117,24 @@
         // socket functions
         const handleCreateRoom = () => {
             socket.emit("createRoom");
-            socket.on("init", (roomId, clientNo, roomSize) =>
-                onInitRoom(roomId, clientNo, roomSize)
-            );
+            socket.on("init", (roomId, roomSize) => onInitRoom(roomId, roomSize));
         };
 
         const handleJoinRoom = () => {
             const roomId = document.getElementById("roomId").value;
             socket.emit("joinRoom", roomId);
-            socket.on("init", (roomId, clientNo, roomSize) =>
-                onInitRoom(roomId, clientNo, roomSize)
-            );
+            socket.on("init", (roomId, roomSize) => onInitRoom(roomId, roomSize));
         };
 
-        document
-            .getElementById("newRoom")
-            .addEventListener("click", handleCreateRoom);
-        document
-            .getElementById("joinRoom")
-            .addEventListener("click", handleJoinRoom);
+        const handleStartRoom = () => {
+            socket.emit("playerReady", roomIdDisplay.textContent);
+            playerReadyButton.disabled = true;
+        };
 
-        const waitingInRoom = () =>
-            socket.emit("waitingInRoom", roomIdDisplay.textContent);
+        socket.on("roomSize", (size) => (playersInRoom.textContent = size));
 
         socket.on("startRoom", (foodOptions, clientNo) => {
-            clearInterval(waitingInterval);
-
             foodOptions.forEach(generateOption);
-
-            checkTurn(clientNo);
-
             displayRoom();
         });
 
@@ -161,32 +143,6 @@
         };
 
         socket.on("throwError", (error) => handleErrors(error));
-
-        socket.on("food choice", function(deleteChoice, roomId, clientNo) {
-            if (roomId !== roomIdDisplay.textContent) {
-                return;
-            }
-
-            for (let i = 0; i < foodChoices.length; i++) {
-                if (foodChoices[i].value === deleteChoice) {
-                    foodChoices[i].disabled = true;
-                    foodButtons[i].classList.add("removed");
-                }
-            }
-
-            checkTurn(clientNo);
-
-            window.scrollTo(0, document.body.scrollHeight);
-
-            const numOfChoicesRemaining = Array.from(foodButtons)
-                .map((choice) => choice.classList)
-                .filter((choice) => !choice.contains("removed")).length;
-
-            if (numOfChoicesRemaining === 1) {
-                submitButton.disabled = true;
-                yourTurn.textContent = "Your choice has been made!";
-            }
-        });
     </script>
 </body>
 

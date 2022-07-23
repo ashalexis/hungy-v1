@@ -21,43 +21,40 @@ section {
 
 fieldset {
     border: 0;
-    display: grid;
-    grid-template-rows: auto;
-    grid-template-columns: 1fr 1fr 1fr;
 }
 
 .foodbutton {
+    border-radius: 10px;
     text-decoration: none;
     color: #1f1f1f;
     font-size: 16px;
-    margin: 0.5rem;
-    border: 1px solid rgb(102, 11, 11);
-    border-radius: 10px;
+    margin: 1rem 0.5rem;
 }
 
 .foodbutton label span {
-    padding: calc(1rem - 1px);
+    padding: 1rem;
     text-align: center;
     display: block;
+    width: 40vw;
+    border: 1px solid #731010;
+    border-radius: 10px;
 }
 
 .foodbutton label input {
     position: absolute;
     display: none;
+    width: 40vw;
 }
 
 .foodbutton input:checked+span {
-    text-decoration: line-through;
-}
-
-.foodbutton.removed {
-    border: 0;
-    text-decoration: line-through;
-    color: #a80000;
-}
-
-.foodbutton.removed label span {
+    border-radius: 10px;
     padding: 1rem;
+    text-decoration: none;
+    font-family: "Ubuntu", sans-serif;
+    border: 1px solid #731010;
+    background-color: #d3b3b3;
+    font-size: 16px;
+    width: 40vw;
 }
 
 input {
@@ -79,15 +76,27 @@ input {
     display: none;
 }
 
+#loadingRoom {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
 
-/* from https://cssloaders.github.io/ */
+#loadingRoom button {
+    margin-top: 10rem;
+}
+
+#playersInRoom {
+    color: #731010;
+}
 
 .loader {
-    position: relative;
+    position: fixed;
     width: 64px;
     height: 60px;
     margin: 5rem auto;
-    z-index: 999;
+    left: 50%;
+    margin-left: -32px;
 }
 
 .loader::after {

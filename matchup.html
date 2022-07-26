@@ -71,7 +71,7 @@
 
     <section id="answerDisplay">
         <h1>Your final answer(s):</h1>
-        <h3 id="finalAnswer"></h3>
+        <div id="finalAnswer"></div>
     </section>
 
     <p>Room ID: <span id="roomIdDisplay"></span></p>
@@ -188,7 +188,6 @@
         };
 
         const handleAnswerChoice = (choice) => {
-            console.log(choice, "choice");
             socket.emit(choice, roomIdDisplay.textContent);
             confirmationModal.style.display = "block";
         };
@@ -236,7 +235,18 @@
         socket.on("finalAnswer", (finalAnswer) => {
             chooseAnswerDisplay.style.display = "none";
             answerDisplay.style.display = "block";
-            document.getElementById("finalAnswer").textContent = finalAnswer;
+
+            if (!Array.isArray(finalAnswer)) {
+                const answer = document.createElement("h3");
+                answer.textContent = finalAnswer;
+                document.getElementById("finalAnswer").appendChild(answer);
+            } else {
+                for (let i = 0; i < finalAnswer.length; i++) {
+                    const answer = document.createElement("h3");
+                    answer.textContent = `${i + 1}. ${finalAnswer[i]}`;
+                    document.getElementById("finalAnswer").appendChild(answer);
+                }
+            }
         });
 
         socket.on("throwError", (error) => handleErrors(error));

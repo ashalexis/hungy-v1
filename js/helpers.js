@@ -7,7 +7,7 @@ const getTopThree = (map) => {
     const sortedEntries = Array.from(map.entries()).sort(([, valA], [, valB]) => {
         return valB - valA;
     });
-    return sortedEntries.slice(2).map(([key]) => key);
+    return sortedEntries.slice(0, 3).map(([key]) => key);
 };
 
 const getRandom = (map) => {

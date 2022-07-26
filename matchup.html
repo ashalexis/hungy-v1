@@ -16,13 +16,13 @@
 
 <body>
     <section id="roomInput">
-        <button id="newRoom" type="button" onClick="handleCreateRoom()">
+        <button id="newRoom" type="button" onclick="handleCreateRoom()">
 				Create new room
 			</button>
         <span>OR...</span>
         <label for="roomId">Room #:</label>
         <input type="text" id="roomId" name="roomId" />
-        <button id="joinRoom" type="button" onClick="handleJoinRoom()">
+        <button id="joinRoom" type="button" onclick="handleJoinRoom()">
 				Join room
 			</button>
     </section>
@@ -30,7 +30,7 @@
     <section id="loadingRoom">
         <span class="loader" id="loader"></span>
         <h3>Number of people in the room: <span id="playersInRoom"></span></h3>
-        <button id="playerReadyButton" onClick="handleStartRoom()">Ready?</button>
+        <button id="playerReadyButton" onclick="handleStartRoom()">Ready?</button>
     </section>
 
     <section id="selection">
@@ -46,6 +46,34 @@
         </form>
     </section>
 
+    <section id="chooseAnswerDisplay">
+        <div id="confirmationModal">
+            <h2>Are you sure?</h2>
+            <p>Your choice is: <span id="confirmationChoice"></span></p>
+            <button class="modalButton" id="confirmAnswer" onclick="handleConfirmAnswer()">
+					YES
+				</button>
+            <button class="modalButton" id="noConfirmAnswer" onclick="handleNoConfirmAnswer()">
+					NO
+				</button>
+        </div>
+        <h1>Which of the below would you like to view?</h1>
+        <button id="mostVoted" onclick="handleAnswerChoice('mostVoted')">
+				Most voted
+			</button>
+        <button id="topThree" onclick="handleAnswerChoice('topThree')">
+				Top 3
+			</button>
+        <button id="random" onclick="handleAnswerChoice('random')">
+				One random from common choices
+			</button>
+    </section>
+
+    <section id="answerDisplay">
+        <h1>Your final answer(s):</h1>
+        <h3 id="finalAnswer"></h3>
+    </section>
+
     <p>Room ID: <span id="roomIdDisplay"></span></p>
 
     <script src="/socket.io/socket.io.js"></script>
@@ -55,6 +83,7 @@
 
         // on load
         let timerInterval;
+        let initialTime = 60;
 
         // document variables
         const form = document.getElementById("form");
@@ -68,19 +97,21 @@
         const yourTurn = document.getElementById("yourTurn");
         const selectionArea = document.getElementById("selection");
         const selectionFieldset = document.getElementById("selectionField");
+        const timer = document.getElementById("timer");
+        const chooseAnswerDisplay = document.getElementById(
+            "chooseAnswerDisplay"
+        );
+        const confirmationModal = document.getElementById("confirmationModal");
+        const answerDisplay = document.getElementById("answerDisplay");
 
         loadingRoom.style.display = "none";
 
-        form.addEventListener("submit", function(e) {
-            e.preventDefault();
-            const choices = Array.from(document.getElementsByTagName("input"))
-                .filter((choice) => choice.checked)
-                .map((choice) => choice.value);
-            console.log(choices);
-            socket.emit("sendChoices", choices, roomIdDisplay.textContent);
-        });
-
         // common functions
+        const getChoices = () =>
+            Array.from(document.getElementsByTagName("input"))
+            .filter((choice) => choice.checked)
+            .map((choice) => choice.value);
+
         const onInitRoom = (roomId, roomSize) => {
             roomIdDisplay.textContent = roomId;
             loadingRoom.style.display = "flex";
@@ -91,6 +122,18 @@
         const displayRoom = () => {
             loadingRoom.style.display = "none";
             selectionArea.style.display = "flex";
+            timer.textContent = initialTime;
+            timerInterval = setInterval(() => {
+                --initialTime;
+                timer.textContent = initialTime;
+
+                if (initialTime === 0) {
+                    clearInterval(timerInterval);
+                    const choices = getChoices();
+                    socket.emit("sendChoices", choices, roomIdDisplay.textContent);
+                    submitButton.disabled = true;
+                }
+            }, 1000);
         };
 
         const generateOption = (option) => {
@@ -114,6 +157,19 @@
             selectionFieldset.appendChild(optionDiv);
         };
 
+        const handleErrors = (error) => {
+            alert(`${error.status}: ${error.message}`);
+        };
+
+        // form functions
+        form.addEventListener("submit", function(e) {
+            e.preventDefault();
+            const choices = getChoices();
+            socket.emit("sendChoices", choices, roomIdDisplay.textContent);
+            submitButton.disabled = true;
+            clearInterval(timerInterval);
+        });
+
         // socket functions
         const handleCreateRoom = () => {
             socket.emit("createRoom");
@@ -131,6 +187,24 @@
             playerReadyButton.disabled = true;
         };
 
+        const handleAnswerChoice = (choice) => {
+            console.log(choice, "choice");
+            socket.emit(choice, roomIdDisplay.textContent);
+            confirmationModal.style.display = "block";
+        };
+
+        const handleConfirmAnswer = () => {
+            socket.emit(
+                "confirmAnswer",
+                document.getElementById("confirmationChoice").textContent,
+                roomIdDisplay.textContent
+            );
+        };
+
+        const handleNoConfirmAnswer = () => {
+            confirmationModal.style.display = "none";
+        };
+
         socket.on("roomSize", (size) => (playersInRoom.textContent = size));
 
         socket.on("startRoom", (foodOptions, clientNo) => {
@@ -138,9 +212,32 @@
             displayRoom();
         });
 
-        const handleErrors = (error) => {
-            alert(`${error.status}: ${error.message}`);
-        };
+        socket.on("displayAnswerOptions", () => {
+            selectionArea.style.display = "none";
+            chooseAnswerDisplay.style.display = "flex";
+        });
+
+        socket.on("mostVoted", () => {
+            confirmationModal.style.display = "block";
+            document.getElementById("confirmationChoice").textContent =
+                "Most Voted";
+        });
+
+        socket.on("topThree", () => {
+            confirmationModal.style.display = "block";
+            document.getElementById("confirmationChoice").textContent = "Top Three";
+        });
+
+        socket.on("random", () => {
+            confirmationModal.style.display = "block";
+            document.getElementById("confirmationChoice").textContent = "Random";
+        });
+
+        socket.on("finalAnswer", (finalAnswer) => {
+            chooseAnswerDisplay.style.display = "none";
+            answerDisplay.style.display = "block";
+            document.getElementById("finalAnswer").textContent = finalAnswer;
+        });
 
         socket.on("throwError", (error) => handleErrors(error));
     </script>

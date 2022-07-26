@@ -5,7 +5,8 @@ import { Server } from "socket.io";
 import path from "path";
 import { fileURLToPath } from "url";
 import express from "express";
-import { foodOptions } from "./constants.js";
+import { foodOptions } from "./js/constants.js";
+import { getMatchupAnswer } from "./js/helpers.js";
 
 const __filename = fileURLToPath(
     import.meta.url);
@@ -116,26 +117,43 @@ matchupSpace.on("connection", (client) => {
         const room = matchupSpace.adapter.rooms.get(roomId);
         matchupChoices.set(roomId, {
             ...matchupChoices.get(roomId),
-            [client.id]: [],
+            [client.id]: null,
         });
 
-        console.log(Object.keys(matchupChoices.get(roomId)).length, room.size);
         if (Object.keys(matchupChoices.get(roomId)).length === room.size) {
             matchupSpace.to(roomId).emit("startRoom", foodOptions, roomId);
         }
     });
 
     client.on("sendChoices", (foodChoices, roomId) => {
+        const room = matchupSpace.adapter.rooms.get(roomId);
         // obj will look like { client.id : foodChoices }
         matchupChoices.set(roomId, {
             ...matchupChoices.get(roomId),
             [client.id]: foodChoices,
         });
-        console.log(matchupChoices);
+
+        if (
+            room &&
+            Object.keys(matchupChoices.get(roomId)).length === room.size &&
+            !Object.values(matchupChoices.get(roomId)).some(
+                (choice) => choice === null
+            )
+        ) {
+            matchupSpace.to(roomId).emit("displayAnswerOptions");
+        }
     });
 
-    client.on("prelimChoices", (foodChoices, clientNumber) => {
-        // make map of choices
+    client.on("mostVoted", (roomId) => matchupSpace.to(roomId).emit("mostVoted"));
+    client.on("topThree", (roomId) => matchupSpace.to(roomId).emit("topThree"));
+    client.on("random", (roomId) => matchupSpace.to(roomId).emit("random"));
+
+    client.on("confirmAnswer", (answerChoice, roomId) => {
+        const finalAnswer = getMatchupAnswer(
+            answerChoice,
+            matchupChoices.get(roomId)
+        );
+        matchupSpace.to(roomId).emit("finalAnswer", finalAnswer);
     });
 
     client.on("disconnecting", (reason) => {

@@ -16,3 +16,20 @@ describe("elimination happy path", () => {
         cy.contains("Room ID:");
     });
 });
+
+describe("matchup happy path", () => {
+    it("loads the main page", () => {
+        cy.visit(ROOT_URL);
+        cy.get("h1").contains("Let's choose!");
+        cy.get("h4").contains("For people who want to eat...");
+        cy.get("button").contains("Matchup").click();
+    });
+
+    it("navigates the matchup landing page", () => {
+        cy.visit(ROOT_URL);
+        cy.get("button").contains("Matchup").click();
+
+        cy.get("#newRoom").click();
+        cy.contains("Room ID:");
+    });
+});

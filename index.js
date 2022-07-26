@@ -120,8 +120,16 @@ matchupSpace.on("connection", (client) => {
             [client.id]: null,
         });
 
-        if (Object.keys(matchupChoices.get(roomId)).length === room.size) {
+        if (
+            Object.keys(matchupChoices.get(roomId)).length === room.size &&
+            room.size > 2
+        ) {
             matchupSpace.to(roomId).emit("startRoom", foodOptions, roomId);
+        } else if (room.size < 3) {
+            client.emit(
+                "throwInfo",
+                `Room is too small! Current number of people waiting: ${room.size}`
+            );
         }
     });
 
@@ -154,6 +162,10 @@ matchupSpace.on("connection", (client) => {
             matchupChoices.get(roomId)
         );
         matchupSpace.to(roomId).emit("finalAnswer", finalAnswer);
+    });
+
+    client.on("noConfirmAnswer", (roomId) => {
+        matchupSpace.to(roomId).emit("noConfirmAnswer");
     });
 
     client.on("disconnecting", (reason) => {

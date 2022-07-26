@@ -83,7 +83,7 @@
 
         // on load
         let timerInterval;
-        let initialTime = 60;
+        let INITIAL_TIME = 30;
 
         // document variables
         const form = document.getElementById("form");
@@ -122,12 +122,12 @@
         const displayRoom = () => {
             loadingRoom.style.display = "none";
             selectionArea.style.display = "flex";
-            timer.textContent = initialTime;
+            timer.textContent = INITIAL_TIME;
             timerInterval = setInterval(() => {
-                --initialTime;
-                timer.textContent = initialTime;
+                --INITIAL_TIME;
+                timer.textContent = INITIAL_TIME;
 
-                if (initialTime === 0) {
+                if (INITIAL_TIME === 0) {
                     clearInterval(timerInterval);
                     const choices = getChoices();
                     socket.emit("sendChoices", choices, roomIdDisplay.textContent);
@@ -159,6 +159,10 @@
 
         const handleErrors = (error) => {
             alert(`${error.status}: ${error.message}`);
+        };
+
+        const handleInfo = (info) => {
+            alert(info);
         };
 
         // form functions
@@ -201,8 +205,12 @@
         };
 
         const handleNoConfirmAnswer = () => {
-            confirmationModal.style.display = "none";
+            socket.emit("noConfirmAnswer", roomIdDisplay.textContent);
         };
+
+        socket.on("noConfirmAnswer", () => {
+            confirmationModal.style.display = "none";
+        });
 
         socket.on("roomSize", (size) => (playersInRoom.textContent = size));
 
@@ -250,6 +258,7 @@
         });
 
         socket.on("throwError", (error) => handleErrors(error));
+        socket.on("throwInfo", (info) => handleInfo(info));
     </script>
 </body>
 

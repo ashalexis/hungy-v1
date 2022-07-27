@@ -1,0 +1,122 @@
+body {
+    background-color: #d4d4d4e0;
+    font-family: "Ubuntu", sans-serif;
+}
+
+h1 {
+    color: #000;
+}
+
+button {
+    border: 0;
+    border-radius: 10px;
+    padding: 1rem;
+    text-decoration: none;
+    color: #fff;
+    background-color: #a80000;
+    font-family: "Ubuntu", sans-serif;
+    font-size: 16px;
+    margin: 0.5rem;
+    width: 50%;
+}
+
+button:hover {
+    background-color: #731010;
+    cursor: pointer;
+}
+
+button:disabled {
+    background-color: #70707063;
+    color: rgba(255, 255, 255, 0.404);
+    border: 0;
+    cursor: not-allowed;
+}
+
+fieldset {
+    border: 0;
+}
+
+
+/*   ROOM ID DISPLAY FOR ALL ROOMS  */
+
+#roomIdDisplay {
+    cursor: copy;
+}
+
+#roomIdDisplayDiv {
+    display: flex;
+    justify-content: center;
+}
+
+#roomIdDisplayDiv button {
+    color: rgb(102, 11, 11);
+    width: 36px;
+    margin: 0 1rem;
+    padding: 0.5rem;
+    background-color: transparent;
+    background-repeat: no-repeat;
+    border: none;
+}
+
+#roomIdDisplayDiv button:hover {
+    color: rgb(102, 11, 11);
+    width: 36px;
+    margin: 0 1rem;
+    padding: 0 0.5rem;
+    background-color: #c4b1b1e0;
+    background-repeat: no-repeat;
+    border: none;
+}
+
+
+/*   LOADER   */
+
+
+/* from https://cssloaders.github.io/ */
+
+.loader {
+    position: relative;
+    width: 64px;
+    height: 60px;
+    margin: 5rem auto;
+    z-index: 999;
+}
+
+.loader::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    background: #1f1f1f;
+    width: 64px;
+    height: 32px;
+    border-radius: 0 0 50px 50px;
+    animation: move 0.5s linear infinite alternate;
+}
+
+.loader::before {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 0;
+    background: #a80000;
+    width: 24px;
+    height: 24px;
+    transform: translateX(-50%) rotate(0deg);
+    animation: rotate 2s linear infinite;
+}
+
+@keyframes rotate {
+    100% {
+        transform: translateX(-50%) rotate(360deg);
+    }
+}
+
+@keyframes move {
+    0% {
+        transform: rotate(10deg);
+    }
+    100% {
+        transform: rotate(-10deg);
+    }
+}

@@ -6,7 +6,7 @@
     <meta lang="en" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta charset="UTF-8" />
-    <link rel="stylesheet" href="./css/main.css" />
+    <link rel="stylesheet" href="./css/common.css" />
     <link rel="stylesheet" href="./css/matchup.css" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -74,8 +74,12 @@
         <div id="finalAnswer"></div>
     </section>
 
-    <p>Room ID: <span id="roomIdDisplay"></span></p>
+    <div id="roomIdDisplayDiv">
+        <p>Room ID: <span id="roomIdDisplay"></span></p>
+        <button onclick="handleCopyRoomId()"><i class="gg-clipboard"></i></button>
+    </div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.10/clipboard.min.js"></script>
     <script src="/socket.io/socket.io.js"></script>
     <script>
         // socket.io connection
@@ -173,6 +177,14 @@
             submitButton.disabled = true;
             clearInterval(timerInterval);
         });
+
+        roomIdDisplay.addEventListener("click", () => {
+            ClipboardJS.copy(document.querySelector("#roomIdDisplay"));
+        });
+
+        const handleCopyRoomId = () => {
+            ClipboardJS.copy(document.querySelector("#roomIdDisplay"));
+        };
 
         // socket functions
         const handleCreateRoom = () => {

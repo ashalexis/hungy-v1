@@ -1,3 +1,4 @@
+@import url("https://css.gg/clipboard.css");
 h1,
 h3 {
     text-align: center;
@@ -77,54 +78,4 @@ input {
 
 #selection {
     display: none;
-}
-
-
-/* from https://cssloaders.github.io/ */
-
-.loader {
-    position: relative;
-    width: 64px;
-    height: 60px;
-    margin: 5rem auto;
-    z-index: 999;
-}
-
-.loader::after {
-    content: "";
-    position: absolute;
-    left: 0;
-    bottom: 0;
-    background: #1f1f1f;
-    width: 64px;
-    height: 32px;
-    border-radius: 0 0 50px 50px;
-    animation: move 0.5s linear infinite alternate;
-}
-
-.loader::before {
-    content: "";
-    position: absolute;
-    left: 50%;
-    top: 0;
-    background: #a80000;
-    width: 24px;
-    height: 24px;
-    transform: translateX(-50%) rotate(0deg);
-    animation: rotate 2s linear infinite;
-}
-
-@keyframes rotate {
-    100% {
-        transform: translateX(-50%) rotate(360deg);
-    }
-}
-
-@keyframes move {
-    0% {
-        transform: rotate(10deg);
-    }
-    100% {
-        transform: rotate(-10deg);
-    }
 }

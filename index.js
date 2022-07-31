@@ -35,7 +35,8 @@ app.get("/matchup", (req, res) => {
 app.use(express.static(path.join(__dirname, ".")));
 
 // globals
-const rooms = {};
+const eliminationRooms = new Map();
+const matchupRooms = {};
 const matchupChoices = new Map();
 const nanoid = customAlphabet(nanoidDictionary.alphanumeric, 8);
 
@@ -48,7 +49,6 @@ eliminationSpace.on("connection", (client) => {
     client.on("createRoom", () => {
         const roomId = nanoid();
         const clientNumber = 1;
-        rooms[client.id] = roomId;
         client.join(roomId);
         const room = eliminationSpace.adapter.rooms.get(roomId);
         client.emit("init", roomId, clientNumber, room.size);
@@ -67,16 +67,22 @@ eliminationSpace.on("connection", (client) => {
             client.emit("throwError", { status: 400, message: "Room full!", roomId });
         } else {
             const clientNumber = 2;
-            rooms[client.id] = roomId;
             client.join(roomId);
             client.emit("init", roomId, clientNumber, room.size);
         }
     });
 
-    client.on("waitingInRoom", (roomId) => {
-        const room = eliminationSpace.adapter.rooms.get(roomId);
-        if (room && room.size === 2) {
-            client.emit("startRoom", foodOptions, 1);
+    client.on("playerReady", (roomId) => {
+        if (eliminationRooms.get(roomId)) {
+            const playersReady = eliminationRooms.get(roomId);
+            playersReady.push(client.id);
+            eliminationRooms.set(playersReady);
+        } else {
+            eliminationRooms.set(roomId, [client.id]);
+        }
+
+        if (eliminationRooms.get(roomId).length === 2) {
+            eliminationSpace.to(roomId).emit("startRoom", foodOptions, 1);
         }
     });
 
@@ -90,7 +96,7 @@ matchupSpace.on("connection", (client) => {
     // making new room
     client.on("createRoom", () => {
         const roomId = nanoid();
-        rooms[client.id] = roomId;
+        matchupRooms[client.id] = roomId;
         client.join(roomId);
         const room = matchupSpace.adapter.rooms.get(roomId);
         client.emit("init", roomId, room.size);
@@ -106,7 +112,7 @@ matchupSpace.on("connection", (client) => {
                 roomId,
             });
         } else {
-            rooms[client.id] = roomId;
+            matchupRooms[client.id] = roomId;
             client.join(roomId);
             client.emit("init", roomId, room.size);
             matchupSpace.to(roomId).emit("roomSize", room.size);

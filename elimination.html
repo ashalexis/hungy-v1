@@ -15,13 +15,22 @@
 </head>
 
 <body>
-    <span class="loader" id="loader"></span>
     <section id="roomInput">
-        <button id="newRoom" type="button">Create new room</button>
+        <button id="newRoom" type="button" onclick="handleCreateRoom()">
+				Create new room
+			</button>
         <span>OR...</span>
         <label for="roomId">Room #:</label>
         <input type="text" id="roomId" name="roomId" autocomplete="off" />
-        <button id="joinRoom" type="button">Join room</button>
+        <button id="joinRoom" type="button" onclick="handleJoinRoom()">
+				Join room
+			</button>
+    </section>
+
+    <section id="loadingRoom">
+        <span class="loader" id="loader"></span>
+        <h3 id="loadingRoomNotice">Waiting for your second player...</h3>
+        <button id="playerReadyButton" onclick="handleStartRoom()">Ready?</button>
     </section>
 
     <section id="selection">
@@ -48,7 +57,6 @@
         const socket = io("/elimination");
 
         // on load
-        let waitingInterval;
         let clientNumber;
 
         // document variables
@@ -57,12 +65,12 @@
         const foodButtons = document.getElementsByClassName("foodbutton");
         const submitButton = document.getElementById("submitButton");
         const roomIdDisplay = document.getElementById("roomIdDisplay");
-        const loader = document.getElementById("loader");
+        const loadingRoom = document.getElementById("loadingRoom");
         const yourTurn = document.getElementById("yourTurn");
         const selectionArea = document.getElementById("selection");
         const selectionFieldset = document.getElementById("selectionField");
 
-        loader.style.display = "none";
+        loadingRoom.style.display = "none";
 
         form.addEventListener("submit", function(e) {
             e.preventDefault();
@@ -90,10 +98,12 @@
         // common functions
         const onInitRoom = (roomId, clientNo, roomSize) => {
             roomIdDisplay.textContent = roomId;
-            loader.style.display = "block";
+            loadingRoom.style.display = "flex";
             clientNumber = clientNo;
             document.getElementById("roomInput").style.display = "none";
-            waitingInterval = setInterval(waitingInRoom, 500);
+            if (clientNo === 2) {
+                document.getElementById("loadingRoomNotice").style.display = "none";
+            }
         };
 
         const checkTurn = (clientNo) => {
@@ -109,7 +119,7 @@
         };
 
         const displayRoom = () => {
-            loader.style.display = "none";
+            loadingRoom.style.display = "none";
             selectionArea.style.display = "flex";
         };
 
@@ -145,24 +155,18 @@
         const handleJoinRoom = () => {
             const roomId = document.getElementById("roomId").value;
             socket.emit("joinRoom", roomId);
-            socket.on("init", (roomId, clientNo, roomSize) =>
-                onInitRoom(roomId, clientNo, roomSize)
-            );
+            socket.on("init", (roomId, clientNo, roomSize) => {
+                console.log("i have init");
+                onInitRoom(roomId, clientNo, roomSize);
+            });
         };
 
-        document
-            .getElementById("newRoom")
-            .addEventListener("click", handleCreateRoom);
-        document
-            .getElementById("joinRoom")
-            .addEventListener("click", handleJoinRoom);
-
-        const waitingInRoom = () =>
-            socket.emit("waitingInRoom", roomIdDisplay.textContent);
+        const handleStartRoom = () => {
+            socket.emit("playerReady", roomIdDisplay.textContent);
+            playerReadyButton.disabled = true;
+        };
 
         socket.on("startRoom", (foodOptions, clientNo) => {
-            clearInterval(waitingInterval);
-
             foodOptions.forEach(generateOption);
 
             checkTurn(clientNo);

@@ -79,3 +79,12 @@ input {
 #selection {
     display: none;
 }
+
+
+/*   LOADING ROOM DISPLAY   */
+
+#loadingRoom {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+}

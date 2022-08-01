@@ -131,7 +131,7 @@
                 --INITIAL_TIME;
                 timer.textContent = INITIAL_TIME;
 
-                if (INITIAL_TIME === 0) {
+                if (timer.textContent === "0") {
                     clearInterval(timerInterval);
                     const choices = getChoices();
                     socket.emit("sendChoices", choices, roomIdDisplay.textContent);

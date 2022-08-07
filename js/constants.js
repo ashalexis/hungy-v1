@@ -67,7 +67,7 @@ export const foodOptions = [{
         value: "Cajun",
     },
     {
-        id: "hungarian",
-        value: "Hungarian",
+        id: "brazilian",
+        value: "Brazilian",
     },
 ];

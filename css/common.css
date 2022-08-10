@@ -1,3 +1,5 @@
+@import url("https://css.gg/trash.css");
+@import url("https://css.gg/clipboard.css");
 body {
     background-color: #d4d4d4e0;
     font-family: "Ubuntu", sans-serif;
@@ -8,32 +10,108 @@ h1 {
 }
 
 button {
-    border: 0;
     border-radius: 10px;
     padding: 1rem;
-    text-decoration: none;
-    color: #fff;
-    background-color: #a80000;
-    font-family: "Ubuntu", sans-serif;
     font-size: 16px;
     margin: 0.5rem;
     width: 50%;
 }
 
-button:hover {
+.primaryButton {
+    border: 0;
+    text-decoration: none;
+    color: #fff;
+    background-color: #a80000;
+    font-family: "Ubuntu", sans-serif;
+}
+
+.primaryButton:hover {
     background-color: #731010;
     cursor: pointer;
 }
 
-button:disabled {
+.primaryButton:disabled {
     background-color: #70707063;
     color: rgba(255, 255, 255, 0.404);
     border: 0;
     cursor: not-allowed;
 }
 
+.secondaryButton {
+    text-decoration: none;
+    color: #1f1f1f;
+    background-color: #d4d4d4e0;
+    font-size: 16px;
+    margin: 0.5rem;
+    border: 1px solid rgb(102, 11, 11);
+    border-radius: 10px;
+}
+
+.secondaryButton:hover {
+    background-color: #d8aeaee0;
+    cursor: pointer;
+}
+
+.secondaryButton:disabled {
+    background-color: #70707063;
+    color: #1f1f1f;
+    border: 0;
+    cursor: not-allowed;
+}
+
+.tertiaryButton {
+    text-decoration: none;
+    color: #731010;
+    background-color: transparent;
+    font-size: 16px;
+    margin: 0.5rem;
+    border: 0;
+    border-radius: 10px;
+}
+
+.tertiaryButton:hover {
+    background-color: #d1b5b5e0;
+    cursor: pointer;
+}
+
+.tertiaryButton:disabled {
+    background-color: #70707063;
+    color: #1f1f1f;
+    border: 0;
+    cursor: not-allowed;
+}
+
+.iconButton {
+    width: 0px;
+    padding-left: 1rem;
+    padding-right: 1.5rem;
+}
+
 fieldset {
     border: 0;
+}
+
+#modalOverlay {
+    position: fixed;
+    display: none;
+    width: 100vw;
+    height: 100vh;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #3030306b;
+    z-index: 3;
+}
+
+.modal {
+    position: absolute;
+    display: none;
+    z-index: 10;
+    padding: 5rem;
+    background-color: #d4d4d4e0;
+    text-align: center;
+    margin: 0 10vw;
 }
 
 
@@ -69,6 +147,39 @@ fieldset {
 }
 
 
+/*   EDIT FOOD OPTIONS LIST   */
+
+#editFoodOptionsList {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    overflow-y: scroll;
+    height: 80vh;
+}
+
+.optionItem {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+}
+
+@media only screen and (min-width: 600px) {
+    .modal {
+        width: 50vw;
+        margin: 0 20vw;
+    }
+    #editFoodOptionsList {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 0 25%;
+        overflow-y: scroll;
+        height: 80vh;
+    }
+}
+
+
 /*   LOADER   */
 
 
@@ -79,7 +190,7 @@ fieldset {
     width: 64px;
     height: 60px;
     margin: 5rem auto;
-    z-index: 999;
+    z-index: 2;
 }
 
 .loader::after {

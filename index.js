@@ -51,7 +51,7 @@ eliminationSpace.on("connection", (client) => {
         const clientNumber = 1;
         client.join(roomId);
         const room = eliminationSpace.adapter.rooms.get(roomId);
-        client.emit("init", roomId, clientNumber, room.size);
+        client.emit("init", roomId, clientNumber, room.size, foodOptions);
     });
 
     // join room
@@ -68,10 +68,11 @@ eliminationSpace.on("connection", (client) => {
         } else {
             const clientNumber = 2;
             client.join(roomId);
-            client.emit("init", roomId, clientNumber, room.size);
+            client.emit("init", roomId, clientNumber, room.size, foodOptions);
         }
     });
 
+    // on player ready
     client.on("playerReady", (roomId) => {
         if (eliminationRooms.get(roomId)) {
             const playersReady = eliminationRooms.get(roomId);
@@ -82,7 +83,7 @@ eliminationSpace.on("connection", (client) => {
         }
 
         if (eliminationRooms.get(roomId).length === 2) {
-            eliminationSpace.to(roomId).emit("startRoom", foodOptions, 1);
+            eliminationSpace.to(roomId).emit("startRoom", 1);
         }
     });
 

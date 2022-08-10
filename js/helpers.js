@@ -40,3 +40,7 @@ export const getMatchupAnswer = (answerChoice, allAnswers) => {
             return;
     }
 };
+
+export const removeDuplicates = (array) => [
+    ...new Map(array.map((item) => [item["id"], item])).values(),
+];

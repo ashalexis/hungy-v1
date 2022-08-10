@@ -15,14 +15,23 @@
 </head>
 
 <body>
+    <div id="modalOverlay" onclick="removeEditOptionsModal()"></div>
+    <div class="modal" id="editOptionsModal">
+        <h3>Add & Edit Options!</h3>
+        <input type="text" id="addFoodOptionInput" name="addFoodOptionInput" autocomplete="off" />
+        <button class="primaryButton" onclick="handleAddFoodOptionInput()" style="width: 10rem; font-size: 14px; padding: 0.5rem">
+				Add Option
+			</button>
+        <div id="editFoodOptionsList"></div>
+    </div>
     <section id="roomInput">
-        <button id="newRoom" type="button" onclick="handleCreateRoom()">
+        <button class="primaryButton" id="newRoom" type="button" onclick="handleCreateRoom()">
 				Create new room
 			</button>
         <span>OR...</span>
-        <label for="roomId">Room #:</label>
-        <input type="text" id="roomId" name="roomId" autocomplete="off" />
-        <button id="joinRoom" type="button" onclick="handleJoinRoom()">
+        <label for="roomIdInput">Room #:</label>
+        <input type="text" id="roomIdInput" name="roomIdInput" autocomplete="off" />
+        <button class="secondaryButton" id="joinRoom" type="button" onclick="handleJoinRoom()">
 				Join room
 			</button>
     </section>
@@ -30,7 +39,12 @@
     <section id="loadingRoom">
         <span class="loader" id="loader"></span>
         <h3 id="loadingRoomNotice">Waiting for your second player...</h3>
-        <button id="playerReadyButton" onclick="handleStartRoom()">Ready?</button>
+        <button class="secondaryButton" id="editChoicesButton" onclick="openEditOptionsModal()" data-toggle="modal" data-target="#editOptionsModal">
+				Edit food choices
+			</button>
+        <button class="primaryButton" id="playerReadyButton" onclick="handleStartRoom()">
+				Ready?
+			</button>
     </section>
 
     <section id="selection">
@@ -41,7 +55,7 @@
         </p>
         <form id="form">
             <fieldset id="selectionField"></fieldset>
-            <button id="submitButton">Submit!</button>
+            <button class="primaryButton" id="submitButton">Submit!</button>
         </form>
     </section>
 
@@ -58,6 +72,7 @@
 
         // on load
         let clientNumber;
+        let foodOptionsList = [];
 
         // document variables
         const form = document.getElementById("form");
@@ -69,6 +84,12 @@
         const yourTurn = document.getElementById("yourTurn");
         const selectionArea = document.getElementById("selection");
         const selectionFieldset = document.getElementById("selectionField");
+        const modalOverlay = document.getElementById("modalOverlay");
+        const editOptionsModal = document.getElementById("editOptionsModal");
+        const editFoodOptionsList = document.getElementById(
+            "editFoodOptionsList"
+        );
+        const addFoodOptionInput = document.getElementById("addFoodOptionInput");
 
         loadingRoom.style.display = "none";
 
@@ -144,29 +165,108 @@
             selectionFieldset.appendChild(optionDiv);
         };
 
+        const createFoodListOptionItem = (value, id = value) => {
+            const optionListItem = document.createElement("div");
+            optionListItem.classList.add("optionItem");
+            optionListItem.id = id;
+            const optionListItemSpan = document.createElement("span");
+            optionListItemSpan.textContent =
+                value.charAt(0).toUpperCase() + value.slice(1);
+            const optionListItemButton = document.createElement("button");
+            optionListItemButton.classList.add("tertiaryButton");
+            optionListItemButton.classList.add("iconButton");
+            optionListItemButton.classList.add("trashButton");
+            optionListItemButton.id = `button_${id}`;
+            optionListItemButton.innerHTML = '<i class="gg-trash"></i>';
+            optionListItem.appendChild(optionListItemSpan);
+            optionListItem.appendChild(optionListItemButton);
+            return optionListItem;
+        };
+
+        const removeDuplicates = (array) => [
+            ...new Map(array.map((item) => [item["id"], item])).values(),
+        ];
+
         // socket functions
         const handleCreateRoom = () => {
             socket.emit("createRoom");
-            socket.on("init", (roomId, clientNo, roomSize) =>
-                onInitRoom(roomId, clientNo, roomSize)
-            );
-        };
-
-        const handleJoinRoom = () => {
-            const roomId = document.getElementById("roomId").value;
-            socket.emit("joinRoom", roomId);
-            socket.on("init", (roomId, clientNo, roomSize) => {
-                console.log("i have init");
+            socket.on("init", (roomId, clientNo, roomSize, foodOptions) => {
                 onInitRoom(roomId, clientNo, roomSize);
+                foodOptionsList = foodOptions;
             });
         };
 
+        const handleJoinRoom = () => {
+            const roomId = document.getElementById("roomIdInput").value;
+            socket.emit("joinRoom", roomId);
+            socket.on("init", (roomId, clientNo, roomSize, foodOptions) => {
+                onInitRoom(roomId, clientNo, roomSize);
+                foodOptionsList = foodOptions;
+            });
+        };
+
+        document
+            .querySelector("#roomIdInput")
+            .addEventListener("keypress", (e) => {
+                if (e.key === "Enter") handleJoinRoom();
+            });
+
+        const openEditOptionsModal = () => {
+            foodOptionsList.forEach((option) => {
+                const optionListItem = createFoodListOptionItem(
+                    option.value,
+                    option.id
+                );
+                editFoodOptionsList.appendChild(optionListItem);
+            });
+
+            modalOverlay.style.display = "block";
+            editOptionsModal.style.display = "block";
+            document.querySelectorAll(".trashButton").forEach((button) =>
+                button.addEventListener("click", () => {
+                    const id = button.id.split("_")[1];
+                    const parentElement = button.parentElement;
+                    parentElement.remove();
+                    foodOptionsList = foodOptionsList.filter(
+                        (option) => option.id !== id
+                    );
+                })
+            );
+            document
+                .querySelector("#addFoodOptionInput")
+                .addEventListener("keypress", (e) => {
+                    if (e.key === "Enter") handleAddFoodOptionInput();
+                });
+        };
+
+        const handleAddFoodOptionInput = () => {
+            const value = document.getElementById("addFoodOptionInput").value;
+            if (!value) return;
+            const optionListItem = createFoodListOptionItem(value);
+            foodOptionsList.unshift({
+                id: value,
+                value: value.charAt(0).toUpperCase() + value.slice(1),
+            });
+            optionListItem.addEventListener("click", () => {
+                optionListItem.remove();
+            });
+            editFoodOptionsList.prepend(optionListItem);
+            document.getElementById("addFoodOptionInput").value = "";
+        };
+
+        const removeEditOptionsModal = () => {
+            modalOverlay.style.display = "none";
+            editOptionsModal.style.display = "none";
+            foodOptionsList = removeDuplicates(foodOptionsList);
+            editFoodOptionsList.innerHTML = "";
+        };
+
         const handleStartRoom = () => {
-            socket.emit("playerReady", roomIdDisplay.textContent);
+            socket.emit("playerReady", roomIdDisplay.textContent, foodOptionsList);
             playerReadyButton.disabled = true;
         };
 
-        socket.on("startRoom", (foodOptions, clientNo) => {
+        socket.on("startRoom", (clientNo, foodOptions) => {
             foodOptions.forEach(generateOption);
 
             checkTurn(clientNo);

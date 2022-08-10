@@ -16,13 +16,13 @@
 
 <body>
     <section id="roomInput">
-        <button id="newRoom" type="button" onclick="handleCreateRoom()">
+        <button class="primaryButton" id="newRoom" type="button" onclick="handleCreateRoom()">
 				Create new room
 			</button>
         <span>OR...</span>
         <label for="roomId">Room #:</label>
         <input type="text" id="roomId" name="roomId" autocomplete="off" />
-        <button id="joinRoom" type="button" onclick="handleJoinRoom()">
+        <button class="secondaryButton" id="joinRoom" type="button" onclick="handleJoinRoom()">
 				Join room
 			</button>
     </section>
@@ -30,7 +30,9 @@
     <section id="loadingRoom">
         <span class="loader" id="loader"></span>
         <h3>Number of people in the room: <span id="playersInRoom"></span></h3>
-        <button id="playerReadyButton" onclick="handleStartRoom()">Ready?</button>
+        <button class="primaryButton" id="playerReadyButton" onclick="handleStartRoom()">
+				Ready?
+			</button>
     </section>
 
     <section id="selection">
@@ -42,12 +44,12 @@
         <h3 id="timer"></h3>
         <form id="form">
             <fieldset id="selectionField"></fieldset>
-            <button id="submitButton">Submit!</button>
+            <button class="primaryButton" id="submitButton">Submit!</button>
         </form>
     </section>
 
     <section id="chooseAnswerDisplay">
-        <div id="confirmationModal">
+        <div class="modal" id="confirmationModal">
             <h2>Are you sure?</h2>
             <p>Your choice is: <span id="confirmationChoice"></span></p>
             <button class="modalButton" id="confirmAnswer" onclick="handleConfirmAnswer()">

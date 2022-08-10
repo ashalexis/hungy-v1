@@ -170,7 +170,8 @@
             optionListItem.classList.add("optionItem");
             optionListItem.id = id;
             const optionListItemSpan = document.createElement("span");
-            optionListItemSpan.textContent = value;
+            optionListItemSpan.textContent =
+                value.charAt(0).toUpperCase() + value.slice(1);
             const optionListItemButton = document.createElement("button");
             optionListItemButton.classList.add("tertiaryButton");
             optionListItemButton.classList.add("iconButton");
@@ -217,8 +218,12 @@
             editOptionsModal.style.display = "block";
             document.querySelectorAll(".trashButton").forEach((button) =>
                 button.addEventListener("click", () => {
+                    const id = button.id.split("_")[1];
                     const parentElement = button.parentElement;
                     parentElement.remove();
+                    foodOptionsList = foodOptionsList.filter(
+                        (option) => option.id !== id
+                    );
                 })
             );
         };
@@ -246,12 +251,12 @@
         };
 
         const handleStartRoom = () => {
-            socket.emit("playerReady", roomIdDisplay.textContent);
+            socket.emit("playerReady", roomIdDisplay.textContent, foodOptionsList);
             playerReadyButton.disabled = true;
         };
 
-        socket.on("startRoom", (clientNo) => {
-            foodOptionsList.forEach(generateOption);
+        socket.on("startRoom", (clientNo, foodOptions) => {
+            foodOptions.forEach(generateOption);
 
             checkTurn(clientNo);
 

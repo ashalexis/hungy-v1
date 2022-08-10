@@ -6,7 +6,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import express from "express";
 import { foodOptions } from "./js/constants.js";
-import { getMatchupAnswer } from "./js/helpers.js";
+import { getMatchupAnswer, removeDuplicates } from "./js/helpers.js";
 
 const __filename = fileURLToPath(
     import.meta.url);
@@ -73,17 +73,27 @@ eliminationSpace.on("connection", (client) => {
     });
 
     // on player ready
-    client.on("playerReady", (roomId) => {
-        if (eliminationRooms.get(roomId)) {
-            const playersReady = eliminationRooms.get(roomId);
-            playersReady.push(client.id);
-            eliminationRooms.set(playersReady);
+    client.on("playerReady", (roomId, foodOptionsList) => {
+        if (eliminationRooms.has(roomId)) {
+            console.log("has roomid");
+            eliminationRooms.set(roomId, {
+                ...eliminationRooms.get(roomId),
+                [client.id]: foodOptionsList,
+            });
         } else {
-            eliminationRooms.set(roomId, [client.id]);
+            console.log("no roomid");
+            eliminationRooms.set(roomId, {
+                [client.id]: foodOptionsList,
+            });
         }
 
-        if (eliminationRooms.get(roomId).length === 2) {
-            eliminationSpace.to(roomId).emit("startRoom", 1);
+        console.log(eliminationRooms.get(roomId));
+
+        if (Object.keys(eliminationRooms.get(roomId)).length === 2) {
+            const allFoodOptions = Object.values(eliminationRooms.get(roomId));
+            const uniqueFoodOptions = removeDuplicates(allFoodOptions.flat());
+            console.log(uniqueFoodOptions);
+            eliminationSpace.to(roomId).emit("startRoom", 1, uniqueFoodOptions);
         }
     });
 

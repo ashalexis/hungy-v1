@@ -225,6 +225,7 @@
 
         const handleAddFoodOptionInput = () => {
             const value = document.getElementById("addFoodOptionInput").value;
+            if (!value) return;
             const optionListItem = createFoodListOptionItem(value);
             foodOptionsList.unshift({
                 id: value,
@@ -234,6 +235,7 @@
                 optionListItem.remove();
             });
             editFoodOptionsList.prepend(optionListItem);
+            document.getElementById("addFoodOptionInput").value = "";
         };
 
         const removeEditOptionsModal = () => {

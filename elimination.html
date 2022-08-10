@@ -29,8 +29,8 @@
 				Create new room
 			</button>
         <span>OR...</span>
-        <label for="roomId">Room #:</label>
-        <input type="text" id="roomId" name="roomId" autocomplete="off" />
+        <label for="roomIdInput">Room #:</label>
+        <input type="text" id="roomIdInput" name="roomIdInput" autocomplete="off" />
         <button class="secondaryButton" id="joinRoom" type="button" onclick="handleJoinRoom()">
 				Join room
 			</button>
@@ -197,13 +197,19 @@
         };
 
         const handleJoinRoom = () => {
-            const roomId = document.getElementById("roomId").value;
+            const roomId = document.getElementById("roomIdInput").value;
             socket.emit("joinRoom", roomId);
             socket.on("init", (roomId, clientNo, roomSize, foodOptions) => {
                 onInitRoom(roomId, clientNo, roomSize);
                 foodOptionsList = foodOptions;
             });
         };
+
+        document
+            .querySelector("#roomIdInput")
+            .addEventListener("keypress", (e) => {
+                if (e.key === "Enter") handleJoinRoom();
+            });
 
         const openEditOptionsModal = () => {
             foodOptionsList.forEach((option) => {
@@ -226,6 +232,11 @@
                     );
                 })
             );
+            document
+                .querySelector("#addFoodOptionInput")
+                .addEventListener("keypress", (e) => {
+                    if (e.key === "Enter") handleAddFoodOptionInput();
+                });
         };
 
         const handleAddFoodOptionInput = () => {

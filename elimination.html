@@ -18,6 +18,10 @@
     <div id="modalOverlay" onclick="removeEditOptionsModal()"></div>
     <div class="modal" id="editOptionsModal">
         <h3>Add & Edit Options!</h3>
+        <input type="text" id="addFoodOptionInput" name="addFoodOptionInput" autocomplete="off" />
+        <button class="primaryButton" onclick="handleAddFoodOptionInput()" style="width: 10rem; font-size: 14px; padding: 0.5rem">
+				Add Option
+			</button>
         <div id="editFoodOptionsList"></div>
     </div>
     <section id="roomInput">
@@ -85,6 +89,7 @@
         const editFoodOptionsList = document.getElementById(
             "editFoodOptionsList"
         );
+        const addFoodOptionInput = document.getElementById("addFoodOptionInput");
 
         loadingRoom.style.display = "none";
 
@@ -160,6 +165,27 @@
             selectionFieldset.appendChild(optionDiv);
         };
 
+        const createFoodListOptionItem = (value, id = value) => {
+            const optionListItem = document.createElement("div");
+            optionListItem.classList.add("optionItem");
+            optionListItem.id = id;
+            const optionListItemSpan = document.createElement("span");
+            optionListItemSpan.textContent = value;
+            const optionListItemButton = document.createElement("button");
+            optionListItemButton.classList.add("tertiaryButton");
+            optionListItemButton.classList.add("iconButton");
+            optionListItemButton.classList.add("trashButton");
+            optionListItemButton.id = `button_${id}`;
+            optionListItemButton.innerHTML = '<i class="gg-trash"></i>';
+            optionListItem.appendChild(optionListItemSpan);
+            optionListItem.appendChild(optionListItemButton);
+            return optionListItem;
+        };
+
+        const removeDuplicates = (array) => [
+            ...new Map(array.map((item) => [item["id"], item])).values(),
+        ];
+
         // socket functions
         const handleCreateRoom = () => {
             socket.emit("createRoom");
@@ -180,19 +206,10 @@
 
         const openEditOptionsModal = () => {
             foodOptionsList.forEach((option) => {
-                const optionListItem = document.createElement("div");
-                optionListItem.classList.add("optionItem");
-                optionListItem.id = option.id;
-                const optionListItemSpan = document.createElement("span");
-                optionListItemSpan.textContent = option.value;
-                const optionListItemButton = document.createElement("button");
-                optionListItemButton.classList.add("tertiaryButton");
-                optionListItemButton.classList.add("iconButton");
-                optionListItemButton.classList.add("trashButton");
-                optionListItemButton.id = `button_${option.id}`;
-                optionListItemButton.innerHTML = '<i class="gg-trash"></i>';
-                optionListItem.appendChild(optionListItemSpan);
-                optionListItem.appendChild(optionListItemButton);
+                const optionListItem = createFoodListOptionItem(
+                    option.value,
+                    option.id
+                );
                 editFoodOptionsList.appendChild(optionListItem);
             });
 
@@ -206,9 +223,24 @@
             );
         };
 
+        const handleAddFoodOptionInput = () => {
+            const value = document.getElementById("addFoodOptionInput").value;
+            const optionListItem = createFoodListOptionItem(value);
+            foodOptionsList.unshift({
+                id: value,
+                value: value.charAt(0).toUpperCase() + value.slice(1),
+            });
+            optionListItem.addEventListener("click", () => {
+                optionListItem.remove();
+            });
+            editFoodOptionsList.prepend(optionListItem);
+        };
+
         const removeEditOptionsModal = () => {
             modalOverlay.style.display = "none";
             editOptionsModal.style.display = "none";
+            foodOptionsList = removeDuplicates(foodOptionsList);
+            editFoodOptionsList.innerHTML = "";
         };
 
         const handleStartRoom = () => {

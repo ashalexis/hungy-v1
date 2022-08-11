@@ -17,11 +17,21 @@
 <body>
     <div id="modalOverlay" onclick="removeEditOptionsModal()"></div>
     <div class="modal" id="editOptionsModal">
-        <h3>Add & Edit Options!</h3>
-        <input type="text" id="addFoodOptionInput" name="addFoodOptionInput" autocomplete="off" />
-        <button class="primaryButton" onclick="handleAddFoodOptionInput()" style="width: 10rem; font-size: 14px; padding: 0.5rem">
-				Add Option
+        <button class="tertiaryButton iconButton" onclick="removeEditOptionsModal()" style="float: right">
+				X
 			</button>
+        <h3>Add & Edit Options!</h3>
+        <div style="
+					display: flex;
+					align-items: center;
+					justify-content: center;
+					width: 100%;
+				">
+            <input type="text" id="addFoodOptionInput" name="addFoodOptionInput" autocomplete="off" />
+            <button class="primaryButton" onclick="handleAddFoodOptionInput()" style="width: 2rem; height: 2rem; font-size: 14px; padding: 0.5rem">
+					+
+				</button>
+        </div>
         <div id="editFoodOptionsList"></div>
     </div>
     <section id="roomInput">

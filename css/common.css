@@ -108,10 +108,10 @@ fieldset {
     position: absolute;
     display: none;
     z-index: 10;
-    padding: 5rem;
+    padding: 1rem 5rem;
     background-color: #d4d4d4e0;
     text-align: center;
-    margin: 0 10vw;
+    max-width: calc(100vw - 10rem);
 }
 
 
@@ -164,10 +164,11 @@ fieldset {
     width: 100%;
 }
 
-@media only screen and (min-width: 600px) {
+@media only screen and (min-width: 768px) {
     .modal {
         width: 50vw;
-        margin: 0 20vw;
+        margin: 0 15vw;
+        padding: 1rem 5rem;
     }
     #editFoodOptionsList {
         display: flex;
@@ -176,6 +177,14 @@ fieldset {
         padding: 0 25%;
         overflow-y: scroll;
         height: 80vh;
+    }
+}
+
+@media only screen and (min-width: 992px) {
+    .modal {
+        width: 50vw;
+        margin: 0 20vw;
+        padding: 1rem 5rem;
     }
 }
 

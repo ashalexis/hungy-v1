@@ -1,279 +1,456 @@
 <!DOCTYPE html>
 <html>
+	<head>
+		<title>Let's choose!</title>
+		<meta lang="en" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<meta charset="UTF-8" />
+		<link rel="stylesheet" href="./css/common.css" />
+		<link rel="stylesheet" href="./css/matchup.css" />
+		<link rel="preconnect" href="https://fonts.googleapis.com" />
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+		<link
+			href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@300;700&display=swap"
+			rel="stylesheet"
+		/>
+		<link rel="icon" type="image/x-icon" href="/images/favicon.ico" />
+	</head>
 
-<head>
-    <title>Let's choose!</title>
-    <meta lang="en" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta charset="UTF-8" />
-    <link rel="stylesheet" href="./css/common.css" />
-    <link rel="stylesheet" href="./css/matchup.css" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@300;700&display=swap" rel="stylesheet" />
-    <link rel="icon" type="image/x-icon" href="/images/favicon.ico" />
-</head>
+	<body>
+		<div id="modalOverlay" onclick="removeModal()"></div>
+		<div class="modal" id="editOptionsModal">
+			<button
+				class="tertiaryButton iconButton"
+				onclick="removeModal()"
+				style="float: right"
+			>
+				X
+			</button>
+			<h3>Add & Edit Options!</h3>
+			<div
+				style="
+					display: flex;
+					align-items: center;
+					justify-content: center;
+					width: 100%;
+				"
+			>
+				<input
+					type="text"
+					id="addFoodOptionInput"
+					name="addFoodOptionInput"
+					autocomplete="off"
+				/>
+				<button
+					class="primaryButton"
+					onclick="handleAddFoodOptionInput()"
+					style="width: 2rem; height: 2rem; font-size: 14px; padding: 0.5rem"
+				>
+					+
+				</button>
+			</div>
+			<div id="editFoodOptionsList"></div>
+		</div>
 
-<body>
-    <section id="roomInput">
-        <button class="primaryButton" id="newRoom" type="button" onclick="handleCreateRoom()">
+		<section id="roomInput">
+			<button
+				class="primaryButton"
+				id="newRoom"
+				type="button"
+				onclick="handleCreateRoom()"
+			>
 				Create new room
 			</button>
-        <span>OR...</span>
-        <label for="roomId">Room #:</label>
-        <input type="text" id="roomId" name="roomId" autocomplete="off" />
-        <button class="secondaryButton" id="joinRoom" type="button" onclick="handleJoinRoom()">
+			<span>OR...</span>
+			<label for="roomId">Room #:</label>
+			<input type="text" id="roomId" name="roomId" autocomplete="off" />
+			<button
+				class="secondaryButton"
+				id="joinRoom"
+				type="button"
+				onclick="handleJoinRoom()"
+			>
 				Join room
 			</button>
-    </section>
+		</section>
 
-    <section id="loadingRoom">
-        <span class="loader" id="loader"></span>
-        <h3>Number of people in the room: <span id="playersInRoom"></span></h3>
-        <button class="primaryButton" id="playerReadyButton" onclick="handleStartRoom()">
+		<section id="loadingRoom">
+			<span class="loader" id="loader"></span>
+			<h3>Number of people in the room: <span id="playersInRoom"></span></h3>
+			<button
+				class="secondaryButton"
+				id="editChoicesButton"
+				onclick="openEditOptionsModal()"
+				data-toggle="modal"
+				data-target="#editOptionsModal"
+			>
+				Edit food choices
+			</button>
+			<button
+				class="primaryButton"
+				id="playerReadyButton"
+				onclick="handleStartRoom()"
+			>
 				Ready?
 			</button>
-    </section>
+		</section>
 
-    <section id="selection">
-        <h1>What would you like to eat?</h1>
-        <p>
-            Every player chooses as many food options as they would like in 30 seconds.
-            <br /> Players can submit their choices or wait until they run out of time.
-        </p>
-        <h3 id="timer"></h3>
-        <form id="form">
-            <fieldset id="selectionField"></fieldset>
-            <button class="primaryButton" id="submitButton">Submit!</button>
-        </form>
-    </section>
+		<section id="selection">
+			<h1>What would you like to eat?</h1>
+			<p>
+				Every player chooses as many food options as they would like in 30
+				seconds.
+				<br />
+				Players can submit their choices or wait until they run out of time.
+			</p>
+			<h3 id="timer"></h3>
+			<form id="form">
+				<fieldset id="selectionField"></fieldset>
+				<button class="primaryButton" id="submitButton">Submit!</button>
+			</form>
+		</section>
 
-    <section id="chooseAnswerDisplay">
-        <div class="modal" id="confirmationModal">
-            <h2>Are you sure?</h2>
-            <p>Your choice is: <span id="confirmationChoice"></span></p>
-            <button class="modalButton" id="confirmAnswer" onclick="handleConfirmAnswer()">
+		<section id="chooseAnswerDisplay">
+			<div class="modal" id="confirmationModal">
+				<h2>Are you sure?</h2>
+				<p>Your choice is: <span id="confirmationChoice"></span></p>
+				<button
+					class="primaryButton modalButton"
+					id="confirmAnswer"
+					onclick="handleConfirmAnswer()"
+				>
 					YES
 				</button>
-            <button class="modalButton" id="noConfirmAnswer" onclick="handleNoConfirmAnswer()">
+				<button
+					class="secondaryButton modalButton"
+					id="noConfirmAnswer"
+					onclick="handleNoConfirmAnswer()"
+				>
 					NO
 				</button>
-        </div>
-        <h1>Which of the below would you like to view?</h1>
-        <button id="mostVoted" onclick="handleAnswerChoice('mostVoted')">
+			</div>
+			<h1>Which of the below would you like to view?</h1>
+			<button
+				class="primaryButton"
+				id="mostVoted"
+				onclick="handleAnswerChoice('mostVoted')"
+			>
 				Most voted
 			</button>
-        <button id="topThree" onclick="handleAnswerChoice('topThree')">
+			<button
+				class="primaryButton"
+				id="topThree"
+				onclick="handleAnswerChoice('topThree')"
+			>
 				Top 3
 			</button>
-        <button id="random" onclick="handleAnswerChoice('random')">
+			<button
+				class="primaryButton"
+				id="random"
+				onclick="handleAnswerChoice('random')"
+			>
 				One random from common choices
 			</button>
-    </section>
+		</section>
 
-    <section id="answerDisplay">
-        <h1>Your final answer(s):</h1>
-        <div id="finalAnswer"></div>
-    </section>
+		<section id="answerDisplay">
+			<h1>Your final answer(s):</h1>
+			<div id="finalAnswer"></div>
+		</section>
 
-    <div id="roomIdDisplayDiv">
-        <p>Room ID: <span id="roomIdDisplay"></span></p>
-        <button onclick="handleCopyRoomId()"><i class="gg-clipboard"></i></button>
-    </div>
+		<div id="roomIdDisplayDiv">
+			<p>Room ID: <span id="roomIdDisplay"></span></p>
+			<button class="tertiaryButton iconButton" onclick="handleCopyRoomId()">
+				<i class="gg-clipboard"></i>
+			</button>
+		</div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.10/clipboard.min.js"></script>
-    <script src="/socket.io/socket.io.js"></script>
-    <script>
-        // socket.io connection
-        const socket = io("/matchup");
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.10/clipboard.min.js"></script>
+		<script src="/socket.io/socket.io.js"></script>
+		<script>
+			// socket.io connection
+			const socket = io("/matchup");
 
-        // on load
-        let timerInterval;
-        let INITIAL_TIME = 30;
+			// on load
+			let timerInterval;
+			let foodOptionsList = [];
+			let INITIAL_TIME = 30;
 
-        // document variables
-        const form = document.getElementById("form");
-        const foodChoices = document.getElementsByName("foodChoice");
-        const foodButtons = document.getElementsByClassName("foodbutton");
-        const submitButton = document.getElementById("submitButton");
-        const roomIdDisplay = document.getElementById("roomIdDisplay");
-        const loadingRoom = document.getElementById("loadingRoom");
-        const playersInRoom = document.getElementById("playersInRoom");
-        const playerReadyButton = document.getElementById("playerReadyButton");
-        const yourTurn = document.getElementById("yourTurn");
-        const selectionArea = document.getElementById("selection");
-        const selectionFieldset = document.getElementById("selectionField");
-        const timer = document.getElementById("timer");
-        const chooseAnswerDisplay = document.getElementById(
-            "chooseAnswerDisplay"
-        );
-        const confirmationModal = document.getElementById("confirmationModal");
-        const answerDisplay = document.getElementById("answerDisplay");
+			// document variables
+			const form = document.getElementById("form");
+			const foodChoices = document.getElementsByName("foodChoice");
+			const foodButtons = document.getElementsByClassName("foodbutton");
+			const submitButton = document.getElementById("submitButton");
+			const roomIdDisplay = document.getElementById("roomIdDisplay");
+			const loadingRoom = document.getElementById("loadingRoom");
+			const playersInRoom = document.getElementById("playersInRoom");
+			const playerReadyButton = document.getElementById("playerReadyButton");
+			const yourTurn = document.getElementById("yourTurn");
+			const selectionArea = document.getElementById("selection");
+			const selectionFieldset = document.getElementById("selectionField");
+			const timer = document.getElementById("timer");
+			const chooseAnswerDisplay = document.getElementById(
+				"chooseAnswerDisplay"
+			);
+			const confirmationModal = document.getElementById("confirmationModal");
+			const answerDisplay = document.getElementById("answerDisplay");
+			const modalOverlay = document.getElementById("modalOverlay");
+			const editOptionsModal = document.getElementById("editOptionsModal");
+			const editFoodOptionsList = document.getElementById(
+				"editFoodOptionsList"
+			);
+			const addFoodOptionInput = document.getElementById("addFoodOptionInput");
 
-        loadingRoom.style.display = "none";
+			loadingRoom.style.display = "none";
 
-        // common functions
-        const getChoices = () =>
-            Array.from(document.getElementsByTagName("input"))
-            .filter((choice) => choice.checked)
-            .map((choice) => choice.value);
+			// common functions
+			const getChoices = () =>
+				Array.from(document.getElementsByTagName("input"))
+					.filter((choice) => choice.checked)
+					.map((choice) => choice.value);
 
-        const onInitRoom = (roomId, roomSize) => {
-            roomIdDisplay.textContent = roomId;
-            loadingRoom.style.display = "flex";
-            playersInRoom.textContent = roomSize;
-            document.getElementById("roomInput").style.display = "none";
-        };
+			const onInitRoom = (roomId, roomSize) => {
+				roomIdDisplay.textContent = roomId;
+				loadingRoom.style.display = "flex";
+				playersInRoom.textContent = roomSize;
+				document.getElementById("roomInput").style.display = "none";
+			};
 
-        const displayRoom = () => {
-            loadingRoom.style.display = "none";
-            selectionArea.style.display = "flex";
-            timer.textContent = INITIAL_TIME;
-            timerInterval = setInterval(() => {
-                --INITIAL_TIME;
-                timer.textContent = INITIAL_TIME;
+			const displayRoom = () => {
+				loadingRoom.style.display = "none";
+				selectionArea.style.display = "flex";
+				timer.textContent = INITIAL_TIME;
+				timerInterval = setInterval(() => {
+					--INITIAL_TIME;
+					timer.textContent = INITIAL_TIME;
 
-                if (timer.textContent === "0") {
-                    clearInterval(timerInterval);
-                    const choices = getChoices();
-                    socket.emit("sendChoices", choices, roomIdDisplay.textContent);
-                    submitButton.disabled = true;
-                }
-            }, 1000);
-        };
+					if (timer.textContent === "0") {
+						clearInterval(timerInterval);
+						const choices = getChoices();
+						socket.emit("sendChoices", choices, roomIdDisplay.textContent);
+						submitButton.disabled = true;
+					}
+				}, 1000);
+			};
 
-        const generateOption = (option) => {
-            const optionInput = document.createElement("input");
-            optionInput.type = "checkbox";
-            optionInput.name = "foodChoice";
-            optionInput.value = option.value;
-            optionInput.id = option.id;
+			const generateOption = (option) => {
+				const optionInput = document.createElement("input");
+				optionInput.type = "checkbox";
+				optionInput.name = "foodChoice";
+				optionInput.value = option.value;
+				optionInput.id = option.id;
 
-            const optionSpan = document.createElement("span");
-            optionSpan.textContent = option.value;
+				const optionSpan = document.createElement("span");
+				optionSpan.textContent = option.value;
 
-            const optionLabel = document.createElement("label");
-            optionLabel.htmlFor = option.id;
-            optionLabel.appendChild(optionInput);
-            optionLabel.appendChild(optionSpan);
-            const optionDiv = document.createElement("div");
-            optionDiv.classList.add("foodbutton");
-            optionDiv.appendChild(optionLabel);
+				const optionLabel = document.createElement("label");
+				optionLabel.htmlFor = option.id;
+				optionLabel.appendChild(optionInput);
+				optionLabel.appendChild(optionSpan);
+				const optionDiv = document.createElement("div");
+				optionDiv.classList.add("foodbutton");
+				optionDiv.appendChild(optionLabel);
 
-            selectionFieldset.appendChild(optionDiv);
-        };
+				selectionFieldset.appendChild(optionDiv);
+			};
 
-        const handleErrors = (error) => {
-            alert(`${error.status}: ${error.message}`);
-        };
+			const createFoodListOptionItem = (value, id = value) => {
+				const optionListItem = document.createElement("div");
+				optionListItem.classList.add("optionItem");
+				optionListItem.id = id;
+				const optionListItemSpan = document.createElement("span");
+				optionListItemSpan.textContent =
+					value.charAt(0).toUpperCase() + value.slice(1);
+				const optionListItemButton = document.createElement("button");
+				optionListItemButton.classList.add("tertiaryButton");
+				optionListItemButton.classList.add("iconButton");
+				optionListItemButton.classList.add("trashButton");
+				optionListItemButton.id = `button_${id}`;
+				optionListItemButton.innerHTML = '<i class="gg-trash"></i>';
+				optionListItem.appendChild(optionListItemSpan);
+				optionListItem.appendChild(optionListItemButton);
+				return optionListItem;
+			};
 
-        const handleInfo = (info) => {
-            alert(info);
-        };
+			const removeDuplicates = (array) => [
+				...new Map(array.map((item) => [item["id"], item])).values(),
+			];
 
-        // form functions
-        form.addEventListener("submit", function(e) {
-            e.preventDefault();
-            const choices = getChoices();
-            socket.emit("sendChoices", choices, roomIdDisplay.textContent);
-            submitButton.disabled = true;
-            clearInterval(timerInterval);
-        });
+			const removeModal = () => {
+				modalOverlay.style.display = "none";
+				editOptionsModal.style.display = "none";
+				confirmationModal.style.display = "none";
+				removeEditOptionsModal();
+			};
 
-        roomIdDisplay.addEventListener("click", () => {
-            ClipboardJS.copy(document.querySelector("#roomIdDisplay"));
-        });
+			const handleErrors = (error) => {
+				alert(`${error.status}: ${error.message}`);
+			};
 
-        const handleCopyRoomId = () => {
-            ClipboardJS.copy(document.querySelector("#roomIdDisplay"));
-        };
+			const handleInfo = (info) => {
+				alert(info);
+			};
 
-        // socket functions
-        const handleCreateRoom = () => {
-            socket.emit("createRoom");
-            socket.on("init", (roomId, roomSize) => onInitRoom(roomId, roomSize));
-        };
+			// form functions
+			form.addEventListener("submit", function (e) {
+				e.preventDefault();
+				const choices = getChoices();
+				socket.emit("sendChoices", choices, roomIdDisplay.textContent);
+				submitButton.disabled = true;
+				clearInterval(timerInterval);
+			});
 
-        const handleJoinRoom = () => {
-            const roomId = document.getElementById("roomId").value;
-            socket.emit("joinRoom", roomId);
-            socket.on("init", (roomId, roomSize) => onInitRoom(roomId, roomSize));
-        };
+			roomIdDisplay.addEventListener("click", () => {
+				ClipboardJS.copy(document.querySelector("#roomIdDisplay"));
+			});
 
-        const handleStartRoom = () => {
-            socket.emit("playerReady", roomIdDisplay.textContent);
-            playerReadyButton.disabled = true;
-        };
+			const handleCopyRoomId = () => {
+				ClipboardJS.copy(document.querySelector("#roomIdDisplay"));
+			};
 
-        const handleAnswerChoice = (choice) => {
-            socket.emit(choice, roomIdDisplay.textContent);
-            confirmationModal.style.display = "block";
-        };
+			// socket functions
+			const handleCreateRoom = () => {
+				socket.emit("createRoom");
+				socket.on("init", (roomId, roomSize, foodOptions) => {
+					onInitRoom(roomId, roomSize);
+					foodOptionsList = foodOptions;
+				});
+			};
 
-        const handleConfirmAnswer = () => {
-            socket.emit(
-                "confirmAnswer",
-                document.getElementById("confirmationChoice").textContent,
-                roomIdDisplay.textContent
-            );
-        };
+			const handleJoinRoom = () => {
+				const roomId = document.getElementById("roomId").value;
+				socket.emit("joinRoom", roomId);
+				socket.on("init", (roomId, roomSize, foodOptions) => {
+					onInitRoom(roomId, roomSize);
+					foodOptionsList = foodOptions;
+				});
+			};
 
-        const handleNoConfirmAnswer = () => {
-            socket.emit("noConfirmAnswer", roomIdDisplay.textContent);
-        };
+			const openEditOptionsModal = () => {
+				foodOptionsList.forEach((option) => {
+					const optionListItem = createFoodListOptionItem(
+						option.value,
+						option.id
+					);
+					editFoodOptionsList.appendChild(optionListItem);
+				});
 
-        socket.on("noConfirmAnswer", () => {
-            confirmationModal.style.display = "none";
-        });
+				modalOverlay.style.display = "block";
+				editOptionsModal.style.display = "block";
+				document.querySelectorAll(".trashButton").forEach((button) =>
+					button.addEventListener("click", () => {
+						const id = button.id.split("_")[1];
+						const parentElement = button.parentElement;
+						parentElement.remove();
+						foodOptionsList = foodOptionsList.filter(
+							(option) => option.id !== id
+						);
+					})
+				);
+				document
+					.querySelector("#addFoodOptionInput")
+					.addEventListener("keypress", (e) => {
+						if (e.key === "Enter") handleAddFoodOptionInput();
+					});
+			};
 
-        socket.on("roomSize", (size) => (playersInRoom.textContent = size));
+			const handleAddFoodOptionInput = () => {
+				const value = document.getElementById("addFoodOptionInput").value;
+				if (!value) return;
+				const optionListItem = createFoodListOptionItem(value);
+				foodOptionsList.unshift({
+					id: value,
+					value: value.charAt(0).toUpperCase() + value.slice(1),
+				});
+				optionListItem.addEventListener("click", () => {
+					optionListItem.remove();
+				});
+				editFoodOptionsList.prepend(optionListItem);
+				document.getElementById("addFoodOptionInput").value = "";
+			};
 
-        socket.on("startRoom", (foodOptions, clientNo) => {
-            foodOptions.forEach(generateOption);
-            displayRoom();
-        });
+			const removeEditOptionsModal = () => {
+				foodOptionsList = removeDuplicates(foodOptionsList);
+				editFoodOptionsList.innerHTML = "";
+			};
 
-        socket.on("displayAnswerOptions", () => {
-            selectionArea.style.display = "none";
-            chooseAnswerDisplay.style.display = "flex";
-        });
+			const handleStartRoom = () => {
+				socket.emit("playerReady", roomIdDisplay.textContent, foodOptionsList);
+				playerReadyButton.disabled = true;
+			};
 
-        socket.on("mostVoted", () => {
-            confirmationModal.style.display = "block";
-            document.getElementById("confirmationChoice").textContent =
-                "Most Voted";
-        });
+			const handleAnswerChoice = (choice) => {
+				socket.emit(choice, roomIdDisplay.textContent);
+				confirmationModal.style.display = "block";
+			};
 
-        socket.on("topThree", () => {
-            confirmationModal.style.display = "block";
-            document.getElementById("confirmationChoice").textContent = "Top Three";
-        });
+			const handleConfirmAnswer = () => {
+				socket.emit(
+					"confirmAnswer",
+					document.getElementById("confirmationChoice").textContent,
+					roomIdDisplay.textContent
+				);
+			};
 
-        socket.on("random", () => {
-            confirmationModal.style.display = "block";
-            document.getElementById("confirmationChoice").textContent = "Random";
-        });
+			const handleNoConfirmAnswer = () => {
+				socket.emit("noConfirmAnswer", roomIdDisplay.textContent);
+			};
 
-        socket.on("finalAnswer", (finalAnswer) => {
-            chooseAnswerDisplay.style.display = "none";
-            answerDisplay.style.display = "block";
+			socket.on("noConfirmAnswer", () => {
+				removeModal();
+			});
 
-            if (!Array.isArray(finalAnswer)) {
-                const answer = document.createElement("h3");
-                answer.textContent = finalAnswer;
-                document.getElementById("finalAnswer").appendChild(answer);
-            } else {
-                for (let i = 0; i < finalAnswer.length; i++) {
-                    const answer = document.createElement("h3");
-                    answer.textContent = `${i + 1}. ${finalAnswer[i]}`;
-                    document.getElementById("finalAnswer").appendChild(answer);
-                }
-            }
-        });
+			socket.on("roomSize", (size) => (playersInRoom.textContent = size));
 
-        socket.on("throwError", (error) => handleErrors(error));
-        socket.on("throwInfo", (info) => handleInfo(info));
-    </script>
-</body>
+			socket.on("startRoom", (foodOptions, clientNo) => {
+				foodOptions.forEach(generateOption);
+				displayRoom();
+			});
 
+			socket.on("displayAnswerOptions", () => {
+				selectionArea.style.display = "none";
+				chooseAnswerDisplay.style.display = "flex";
+			});
+
+			socket.on("mostVoted", () => {
+				confirmationModal.style.display = "block";
+				modalOverlay.style.display = "block";
+				document.getElementById("confirmationChoice").textContent =
+					"Most Voted";
+			});
+
+			socket.on("topThree", () => {
+				confirmationModal.style.display = "block";
+				modalOverlay.style.display = "block";
+				document.getElementById("confirmationChoice").textContent = "Top Three";
+			});
+
+			socket.on("random", () => {
+				confirmationModal.style.display = "block";
+				modalOverlay.style.display = "block";
+				document.getElementById("confirmationChoice").textContent = "Random";
+			});
+
+			socket.on("finalAnswer", (finalAnswer) => {
+				removeModal();
+				chooseAnswerDisplay.style.display = "none";
+				answerDisplay.style.display = "block";
+
+				if (!Array.isArray(finalAnswer)) {
+					const answer = document.createElement("h3");
+					answer.textContent = finalAnswer;
+					document.getElementById("finalAnswer").appendChild(answer);
+				} else {
+					for (let i = 0; i < finalAnswer.length; i++) {
+						const answer = document.createElement("h3");
+						answer.textContent = `${i + 1}. ${finalAnswer[i]}`;
+						document.getElementById("finalAnswer").appendChild(answer);
+					}
+				}
+			});
+
+			socket.on("throwError", (error) => handleErrors(error));
+			socket.on("throwInfo", (info) => handleInfo(info));
+		</script>
+	</body>
 </html>

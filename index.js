@@ -75,24 +75,19 @@ eliminationSpace.on("connection", (client) => {
     // on player ready
     client.on("playerReady", (roomId, foodOptionsList) => {
         if (eliminationRooms.has(roomId)) {
-            console.log("has roomid");
             eliminationRooms.set(roomId, {
                 ...eliminationRooms.get(roomId),
                 [client.id]: foodOptionsList,
             });
         } else {
-            console.log("no roomid");
             eliminationRooms.set(roomId, {
                 [client.id]: foodOptionsList,
             });
         }
 
-        console.log(eliminationRooms.get(roomId));
-
         if (Object.keys(eliminationRooms.get(roomId)).length === 2) {
             const allFoodOptions = Object.values(eliminationRooms.get(roomId));
             const uniqueFoodOptions = removeDuplicates(allFoodOptions.flat());
-            console.log(uniqueFoodOptions);
             eliminationSpace.to(roomId).emit("startRoom", 1, uniqueFoodOptions);
         }
     });
@@ -109,7 +104,7 @@ matchupSpace.on("connection", (client) => {
         const roomId = nanoid();
         client.join(roomId);
         const room = matchupSpace.adapter.rooms.get(roomId);
-        client.emit("init", roomId, room.size);
+        client.emit("init", roomId, room.size, foodOptions);
     });
 
     // join room
@@ -129,23 +124,42 @@ matchupSpace.on("connection", (client) => {
             });
         } else {
             client.join(roomId);
-            client.emit("init", roomId, room.size);
+            client.emit("init", roomId, room.size, foodOptions);
             matchupSpace.to(roomId).emit("roomSize", room.size);
         }
     });
 
-    client.on("playerReady", (roomId) => {
+    client.on("playerReady", (roomId, foodOptionsList) => {
         const room = matchupSpace.adapter.rooms.get(roomId);
-        matchupRooms.set(roomId, {
-            ...matchupRooms.get(roomId),
-            [client.id]: null,
-        });
+
+        if (matchupRooms.get(roomId)) {
+            matchupRooms.set(roomId, {
+                ...matchupRooms.get(roomId),
+                [client.id]: null,
+                allFoodOptions: [
+                    ...matchupRooms.get(roomId).allFoodOptions,
+                    ...foodOptionsList,
+                ],
+            });
+        } else {
+            matchupRooms.set(roomId, {
+                ...matchupRooms.get(roomId),
+                [client.id]: null,
+                allFoodOptions: foodOptionsList,
+            });
+        }
 
         if (
-            Object.keys(matchupRooms.get(roomId)).length === room.size &&
+            Object.keys(matchupRooms.get(roomId)).filter(
+                (key) => key !== "allFoodOptions"
+            ).length === room.size &&
             room.size > 2
         ) {
-            matchupSpace.to(roomId).emit("startRoom", foodOptions, roomId);
+            const allFoodOptions = Object.values(
+                matchupRooms.get(roomId).allFoodOptions
+            );
+            const uniqueFoodOptions = removeDuplicates(allFoodOptions.flat());
+            matchupSpace.to(roomId).emit("startRoom", uniqueFoodOptions, roomId);
             roomClosed.set(roomId, true);
         } else if (room.size < 3) {
             client.emit(
@@ -157,7 +171,6 @@ matchupSpace.on("connection", (client) => {
 
     client.on("sendChoices", (foodChoices, roomId) => {
         const room = matchupSpace.adapter.rooms.get(roomId);
-        // obj will look like { client.id : foodChoices }
         matchupRooms.set(roomId, {
             ...matchupRooms.get(roomId),
             [client.id]: foodChoices,
@@ -165,7 +178,6 @@ matchupSpace.on("connection", (client) => {
 
         if (
             room &&
-            Object.keys(matchupRooms.get(roomId)).length === room.size &&
             !Object.values(matchupRooms.get(roomId)).some((choice) => choice === null)
         ) {
             matchupSpace.to(roomId).emit("displayAnswerOptions");

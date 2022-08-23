@@ -84,10 +84,6 @@ input {
     align-items: center;
 }
 
-#loadingRoom button {
-    margin-top: 10rem;
-}
-
 #playersInRoom {
     color: #731010;
 }

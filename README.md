@@ -1,11 +1,11 @@
-# Let's decide!
+# Hungy!
 
 Have you and your partner(s) ever struggled to decide on what to eat?
 This site was created for this very purpose, so no one will ever have to pull their hair out over food decisions ever again! :)
 
 ## Current version: v1.0
 
-Find me on Heroku: [Let's choose!](https://lets-choose-app.herokuapp.com/)
+
 
 ### Made with
 
@@ -18,8 +18,6 @@ Find me on Heroku: [Let's choose!](https://lets-choose-app.herokuapp.com/)
 to install: `yarn`
 
 to run the app: `yarn dev`
-
-to run Cypress E2E test (headed): `yarn test:e2e:open`
 
 ## Special Shout-outs
 

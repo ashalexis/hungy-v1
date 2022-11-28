@@ -1,11 +1,11 @@
 {
-    "name": "lets-choose",
+    "name": "hungy",
     "author": "Ash Lim",
     "version": "1.0.0",
     "description": "A site to choose what to eat",
     "repository": {
         "type": "git",
-        "url": "https://github.com/ashalexis/lets-choose"
+        "url": "https://github.com/ashalexis/hungy-v1"
     },
     "license": "MIT",
     "scripts": {
